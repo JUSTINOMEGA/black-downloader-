@@ -3,29 +3,32 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Black Video Downloader - Fast & Free</title>
+<!-- REPLACE THIS WITH YOUR POPUNDER / SOCIAL BAR CODE -->
+<!-- YOUR_AD_CODE_1_POPUNDER -->
+
 <style>
-body{margin:0;background:#080808;color:#fff;font-family:Arial, sans-serif;text-align:center}
-.header{padding:15px;background:#111;display:flex;justify-content:space-between;align-items:center;font-size:14px}
-.live{color:#00ff66;font-weight:bold}
+body{margin:0;background:#080808;color:#fff;font-family:Arial, sans-serif;text-align:center;padding-bottom:80px}
+.header{padding:12px 15px;background:#111;display:flex;justify-content:space-between;align-items:center;font-size:14px;position:sticky;top:0;z-index:10}
+.live{color:#00ff66;font-weight:bold;display:flex;align-items:center}
 .live span{width:8px;height:8px;background:#00ff66;display:inline-block;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #00ff66;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.main{padding:30px 15px}
-h1{font-size:28px;margin-bottom:5px}
-.sub{color:#aaa;margin-bottom:20px}
-.box{background:#151515;max-width:600px;margin:20px auto;padding:20px;border-radius:16px;border:1px solid #222}
+.main{padding:25px 15px}
+h1{font-size:26px;margin-bottom:5px}
+.sub{color:#aaa;margin-bottom:18px;font-size:14px}
+.box{background:#151515;max-width:600px;margin:0 auto;padding:20px;border-radius:16px;border:1px solid #222}
 input{width:100%;padding:16px;border-radius:12px;border:1px solid #333;background:#0e0e0e;color:#fff;font-size:16px;box-sizing:border-box;outline:none}
 input:focus{border-color:#00ff66}
 button{width:100%;margin-top:12px;padding:15px;background:#00ff66;color:#000;border:none;border-radius:12px;font-weight:bold;font-size:17px;cursor:pointer}
-button:hover{background:#00e65c}
-.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;max-width:600px;margin-left:auto;margin-right:auto}
-.p{background:#1a1a1a;padding:14px 5px;border-radius:12px;font-size:13px;text-decoration:none;color:#fff;border:1px solid #252525;display:block;transition:0.2s}
-.p:hover{background:#222;border-color:#00ff66;transform:translateY(-2px)}
+.ad-box{margin:15px auto;max-width:600px;background:#111;border-radius:10px;padding:5px;min-height:90px;display:flex;align-items:center;justify-content:center;border:1px dashed #333;color:#555;font-size:12px}
+.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px;max-width:600px;margin-left:auto;margin-right:auto}
+.p{background:#1a1a1a;padding:14px 5px;border-radius:12px;font-size:13px;text-decoration:none;color:#fff;border:1px solid #252525;display:block}
 .p span{font-size:26px;display:block;margin-bottom:4px}
-#result{margin-top:25px;max-width:600px;margin-left:auto;margin-right:auto;text-align:left}
+#result{margin-top:20px;max-width:600px;margin-left:auto;margin-right:auto;text-align:left}
 .vcard{background:#151515;border-radius:14px;padding:15px;border:1px solid #222}
 .vcard img{width:100%;border-radius:10px;margin-bottom:10px}
 a.down{display:block;background:#00ff66;color:#000;padding:12px;text-align:center;border-radius:10px;margin-top:8px;text-decoration:none;font-weight:bold}
-a.down:nth-child(odd){background:#222;color:#00ff66;border:1px solid #333}
+a.down:nth-child(even){background:#222;color:#00ff66;border:1px solid #333}
+.sticky-ad{position:fixed;bottom:0;left:0;width:100%;background:#000;border-top:1px solid #222;padding:5px;z-index:999;text-align:center}
 </style>
 </head>
 <body>
@@ -37,11 +40,17 @@ a.down:nth-child(odd){background:#222;color:#00ff66;border:1px solid #333}
 
 <div class="main">
   <h1>All Video Downloader</h1>
-  <div class="sub">{{ total }}+ Videos Downloaded • Fast • Free • No Watermark</div>
+  <div class="sub">{{ total }}+ Videos Downloaded • Fast • No Watermark</div>
 
   <div class="box">
-    <input id="url" placeholder="Paste Facebook, TikTok, IG, YouTube link here...">
+    <input id="url" placeholder="Paste Facebook, TikTok, IG, YouTube, Telegram link...">
     <button onclick="getVideo()">DOWNLOAD NOW</button>
+  </div>
+
+  <!-- AD 1 - TOP BANNER (320x50 / 300x250) PASTE HERE -->
+  <div class="ad-box">
+    <!-- YOUR_AD_CODE_2_TOP_BANNER -->
+    Top Ad - Paste your banner code here
   </div>
 
   <div class="platforms">
@@ -56,29 +65,43 @@ a.down:nth-child(odd){background:#222;color:#00ff66;border:1px solid #333}
   </div>
 
   <div id="result"></div>
+
+  <!-- AD 2 - AFTER RESULT (THIS ONE BRINGS MOST MONEY) -->
+  <div class="ad-box" id="ad2" style="display:none">
+    <!-- YOUR_AD_CODE_3_MIDDLE -->
+    Middle Ad - Paste your code here
+  </div>
+
+</div>
+
+<!-- AD 3 - STICKY BOTTOM (BEST FOR EARNING) -->
+<div class="sticky-ad">
+  <!-- YOUR_AD_CODE_4_STICKY_BOTTOM -->
+  Bottom Sticky Ad - Paste 320x50 code here
 </div>
 
 <script>
 async function getVideo(){
   let u = document.getElementById('url').value.trim();
   if(!u){ alert("Paste link first!"); return; }
-  document.getElementById('result').innerHTML = "<div style='color:#00ff66'>⏳ Getting video info...</div>";
+  document.getElementById('result').innerHTML = "<div style='color:#00ff66;text-align:center'>⏳ Getting video...</div>";
+  document.getElementById('ad2').style.display = 'flex';
   try{
     let res = await fetch('/info?url=' + encodeURIComponent(u));
     let data = await res.json();
     if(data.error){
-      document.getElementById('result').innerHTML = `<div style='background:#2a1111;padding:12px;border-radius:10px;color:#ff6b6b'>❌ ${data.error}</div>`;
+      document.getElementById('result').innerHTML = `<div style='background:#2a1111;padding:12px;border-radius:10px;color:#ff6b6b;text-align:center'>❌ ${data.error}</div>`;
       return;
     }
     let html = `<div class="vcard">`;
     if(data.thumbnail) html += `<img src="${data.thumbnail}">`;
     html += `<div style="font-weight:bold;margin-bottom:10px">${data.title}</div>`;
     data.formats.forEach(f=>{
-      html += `<a class="down" href="${f.url}" target="_blank" download>⬇ Download ${f.quality} (${f.ext.toUpperCase()})</a>`;
+      html += `<a class="down" href="${f.url}" target="_blank">⬇ Download ${f.quality}</a>`;
     });
     html += `</div>`;
     document.getElementById('result').innerHTML = html;
-    window.scrollTo(0, document.body.scrollHeight);
+    window.scrollTo(0, 300);
   }catch(e){
     document.getElementById('result').innerHTML = "❌ Error: " + e.message;
   }
