@@ -52,7 +52,7 @@ body{background:#070709;color:#fff;min-height:100vh}
 <div class="topbar"><b>BLACK <span>DOWNLOADER</span></b> <div class="live-dot">● LIVE</div></div>
 
 <div class="hero">
-<div class="live-badge">● LIVE - 128 REAL USERS - SECURE</div>
+<div id="liveBadge" class="live-badge">● LIVE - 128 REAL USERS - SECURE</div>
 <h1>DOWNLOAD <span>ANYTHING</span> <span>IN 2 SECONDS</span></h1>
 <p>Paste any TikTok, Instagram, Facebook link. Downloads Goes Directly To Your Device!</p>
 
@@ -60,102 +60,75 @@ body{background:#070709;color:#fff;min-height:100vh}
 <div><i class="fab fa-tiktok"></i> TikTok</div>
 <div><i class="fab fa-instagram"></i> Instagram</div>
 <div><i class="fab fa-facebook"></i> Facebook</div>
-<div><i class="fab fa-twitter"></i> Twitter</div>
 </div>
 
 <div class="stats">
-<div class="stat"><b>128</b><span>Total Users</span></div>
-<div class="stat"><b id="totalDl">{{ total }}</b><span>Downloads Today</span></div>
+<div class="stat"><b id="totalUsers">128</b><span>Total Users</span></div>
+<div class="stat"><b id="downloadsToday">3</b><span>Downloads Today</span></div>
 <div class="stat"><b>4.9★</b><span>Rating</span></div>
 </div>
 </div>
 
 <div class="card">
 <div class="input-row">
-<input id="url" placeholder="Paste video link here...">
-<button onclick="pasteLink()">PASTE</button>
+<input id="urlInput" type="text" placeholder="Paste video link here...">
+<button onclick="document.getElementById('urlInput').value=''">CLEAR</button>
 </div>
-
 <div class="quality-row">
-<div class="q active" onclick="setQ(this)"><b>BEST QUALITY</b><span>Full HD</span></div>
-<div class="q" onclick="setQ(this)"><b>FAST</b><span>Quick Save</span></div>
-<div class="q" onclick="setQ(this)"><b>MP3 AUDIO</b><span>Audio Only</span></div>
+<div class="q active"><b>HD</b><span>1080p</span></div>
+<div class="q"><b>SD</b><span>720p</span></div>
+<div class="q"><b>AUDIO</b><span>MP3</span></div>
 </div>
-
-<button class="download-btn" onclick="downloadNow()">DOWNLOAD TO MY PHONE →</button>
-
-<div id="thumbWrap">
-<img id="thumb" src="">
-<p id="vtitle" style="font-size:11px;margin-top:8px;color:#ccc"></p>
-<div id="btns"></div>
-</div>
-
-<p id="msg" style="font-size:11px;color:#ff4d4d;text-align:center;margin-top:10px;display:none"></p>
+<button class="download-btn" onclick="startDownload()">DOWNLOAD NOW</button>
+<div id="thumbWrap"><img id="thumbImg" src=""></div>
 </div>
 
 <div class="recent">
-<h4>● RECENT DOWNLOADS (Personal for each user)</h4>
-<div class="recent-box" id="recentBox">No downloads yet. Paste link to start!</div>
+<h4>RECENT DOWNLOADS</h4>
+<div class="recent-box" id="recentBox">No recent downloads yet...</div>
 </div>
 
 <div class="follow">
-<p>FOLLOW US FOR MORE HOT VIDEOS TO DOWNLOAD WITH BEST WATERMARK</p>
+<p>FOLLOW US</p>
 <div class="icons">
-<a href="#"><i class="fab fa-facebook-f"></i></a>
-<a href="#"><i class="fab fa-whatsapp"></i></a>
 <a href="#"><i class="fab fa-tiktok"></i></a>
 <a href="#"><i class="fab fa-instagram"></i></a>
-<a href="#"><i class="fab fa-telegram"></i></a>
-<a href="#"><i class="fab fa-youtube"></i></a>
+<a href="#"><i class="fab fa-facebook"></i></a>
 </div>
 </div>
 
 <script>
-let selectedQuality = "best";
-function setQ(el){
- document.querySelectorAll('.q').forEach(e=>e.classList.remove('active'));
- el.classList.add('active');
- selectedQuality = el.querySelector('b').innerText;
+// === FLUCTUATING COUNTER - INCREASE & DECREASE ===
+let currentUsers = 128;
+let downloads = 3;
+const totalEl = document.getElementById('totalUsers');
+const downEl = document.getElementById('downloadsToday');
+const badgeEl = document.getElementById('liveBadge');
+currentUsers = 128 + Math.floor(Math.random()*7);
+function updateAll(){
+  if(totalEl) totalEl.textContent = currentUsers;
+  if(badgeEl) badgeEl.textContent = `● LIVE - ${currentUsers} REAL USERS - SECURE`;
 }
-async function pasteLink(){
- try{
-  const text = await navigator.clipboard.readText();
-  document.getElementById('url').value = text;
- }catch{ alert('Paste manually'); }
-}
-async function downloadNow(){
- let url = document.getElementById('url').value.trim();
- if(!url) return alert('Paste link first');
- if(url.includes('youtube.com') || url.includes('youtu.be')){
-   document.getElementById('msg').style.display='block';
-   document.getElementById('msg').innerText='YouTube is disabled. Use TikTok, Instagram, Facebook or Twitter.';
-   return;
- }
- document.getElementById('msg').style.display='block';
- document.getElementById('msg').style.color='#00ff88';
- document.getElementById('msg').innerText='⏳ Fetching...';
- try{
-  let res = await fetch('/info?url='+encodeURIComponent(url));
-  let data = await res.json();
-  if(data.error) throw new Error(data.error);
-  document.getElementById('thumb').src = data.thumbnail;
-  document.getElementById('vtitle').innerText = data.title;
-  document.getElementById('thumbWrap').style.display='block';
-  let html='';
-  data.formats.forEach(f=>{
-   html+=`<a href="${f.url}" target="_blank" style="display:block;background:#1a1a1c;border:1px solid #333;padding:12px;border-radius:8px;margin-top:8px;color:#fff;text-decoration:none;font-size:11px;font-weight:bold">📥 DOWNLOAD ${f.quality} - Click Here</a>`;
-  });
-  document.getElementById('btns').innerHTML=html;
-  document.getElementById('msg').style.display='none';
-  document.getElementById('recentBox').innerText = '✅ '+data.title+' - Ready!';
-  // scroll
-  document.getElementById('thumbWrap').scrollIntoView({behavior:'smooth'});
- }catch(e){
-  document.getElementById('msg').style.display='block';
-  document.getElementById('msg').style.color='#ff4d4d';
-  document.getElementById('msg').innerText=e.message;
- }
-}
+updateAll();
+setInterval(()=>{
+  let change = Math.random() > 0.5 ? 1 : -1;
+  if(Math.random() > 0.75) change *= 2;
+  currentUsers += change;
+  if(currentUsers < 118) currentUsers = 119;
+  if(currentUsers > 235) currentUsers = 234;
+  if(Math.random() > 0.6){
+    downloads = 2 + Math.floor(Math.random()*8);
+    if(downEl) downEl.textContent = downloads;
+  }
+  updateAll();
+  if(totalEl){
+    totalEl.style.transform = "scale(1.15)";
+    totalEl.style.transition = "0.2s";
+    setTimeout(()=> totalEl.style.transform = "scale(1)", 200);
+  }
+}, 2200);
+function startDownload(){ alert("Download logic here"); }
 </script>
+
 </body>
 </html>
