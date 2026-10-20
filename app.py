@@ -1,121 +1,95 @@
 from flask import Flask, request, jsonify, render_template
 import yt_dlp
 import os
-import random
+import time
+import threading
 
 app = Flask(__name__)
 
-# Stats for UI
-STATS = {"total_downloads": 12483, "online": 127}
+stats_file = "stats.txt"
+online_users = {}
+lock = threading.Lock()
 
-def get_cookies_file():
-    # If cookies.txt dey, use am. If e no dey, work without am.
-    if os.path.exists("cookies.txt"):
-        return "cookies.txt"
-    if os.path.exists("fb_cookies.txt"):
-        return "fb_cookies.txt"
-    return None
+def get_stats():
+    if not os.path.exists(stats_file):
+        return 0
+    try:
+        with open(stats_file, 'r') as f:
+            return int(f.read().strip() or 0)
+    except:
+        return 0
 
-@app.route("/")
+def add_download():
+    with lock:
+        count = get_stats() + 1
+        with open(stats_file, 'w') as f:
+            f.write(str(count))
+
+def track_online(ip):
+    with lock:
+        online_users[ip] = time.time()
+        now = time.time()
+        for k in list(online_users.keys()):
+            if now - online_users[k] > 300:
+                del online_users[k]
+        return len(online_users)
+
+@app.route('/')
 def index():
-    # Random online for live effect
-    STATS["online"] = random.randint(95, 210)
-    return render_template("index.html", online=STATS["online"], total=STATS["total_downloads"])
+    ip = request.remote_addr
+    online = track_online(ip)
+    total = get_stats()
+    return render_template('index.html', online=online, total=total)
 
-@app.route("/info")
+@app.route('/info')
 def info():
-    url = request.args.get("url", "").strip()
+    url = request.args.get('url')
     if not url:
-        return jsonify({"error": "No URL pasted"}), 400
-    
-    # Add https if user no add am (for telegram etc)
-    if not url.startswith("http"):
-        url = "https://" + url
-
-    STATS["total_downloads"] += 1
+        return jsonify({"error": "No URL provided"}), 400
 
     ydl_opts = {
-        "quiet": True,
-        "skip_download": True,
-        "no_warnings": True,
-        "nocheckcertificate": True,
-        "format": "best",
+        'quiet': True,
+        'no_warnings': True,
+        'skip_download': True,
+        'noplaylist': True,
     }
-
-    cookie = get_cookies_file()
-    if cookie:
-        ydl_opts["cookiefile"] = cookie
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             data = ydl.extract_info(url, download=False)
-            
-            # Handle playlist - take first video
-            if "entries" in data:
-                data = data["entries"][0]
-
-            formats_list = []
-            
-            if "formats" in data and data["formats"]:
+            formats = []
+            if 'formats' in data:
                 seen = set()
-                for f in data["formats"]:
-                    ext = f.get("ext", "mp4")
-                    height = f.get("height")
-                    vcodec = f.get("vcodec")
-                    
-                    # Video formats
-                    if vcodec != "none" and height:
-                        key = f"{height}p"
-                        if key not in seen:
-                            formats_list.append({
-                                "quality": f"{height}p HD" if height >= 720 else f"{height}p",
-                                "url": f.get("url"),
-                                "ext": ext,
-                                "height": height
+                for f in data.get('formats', [])[-15:]:
+                    if f.get('vcodec') != 'none' and f.get('acodec') != 'none' and f.get('url'):
+                        q = f.get('height')
+                        quality = f"{q}p" if q else f.get('format_id', 'MP4')
+                        if quality not in seen:
+                            formats.append({
+                                "quality": quality,
+                                "ext": f.get('ext', 'mp4'),
+                                "url": f.get('url')
                             })
-                            seen.add(key)
-                
-                # Sort high to low
-                formats_list = sorted(formats_list, key=lambda x: x.get("height",0), reverse=True)
-            
-            # Fallback - direct url
-            if not formats_list:
-                direct_url = data.get("url") or (data.get("formats", [{}])[0].get("url") if data.get("formats") else None)
-                if direct_url:
-                    formats_list.append({"quality": "HD Video", "url": direct_url, "ext": "mp4", "height": 720})
-                    formats_list.append({"quality": "MP3 Audio", "url": direct_url, "ext": "mp3", "height": 0})
-            
-            # Cut to 6 best
-            formats_list = formats_list[:6]
+                            seen.add(quality)
+                formats = formats[-5:][::-1]
+            else:
+                formats = [{
+                    "quality": "Best",
+                    "ext": data.get('ext', 'mp4'),
+                    "url": data.get('url')
+                }]
 
-            if not formats_list:
-                return jsonify({"error": "No download links found for this platform"}), 400
+            add_download()
 
             return jsonify({
-                "title": data.get("title", "Black Video"),
-                "thumbnail": data.get("thumbnail", ""),
-                "formats": formats_list,
-                "total": STATS["total_downloads"],
-                "online": random.randint(95, 210)
+                "title": data.get('title', 'Video'),
+                "thumbnail": data.get('thumbnail', ''),
+                "formats": formats
             })
 
     except Exception as e:
-        err = str(e)
-        # Cleaner error for user
-        if "Unsupported URL" in err:
-            return jsonify({"error": "This link not supported yet"}), 400
-        if "Private" in err or "login" in err.lower():
-            return jsonify({"error": "This video is private. Make it public first."}), 400
-        return jsonify({"error": err}), 500
+        return jsonify({"error": f"Cannot download this link: {str(e)}"}), 500
 
-@app.route("/stats")
-def stats():
-    return jsonify(STATS)
-
-@app.route("/health")
-def health():
-    return "OK"
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host='0.0.0.0', port=port)
