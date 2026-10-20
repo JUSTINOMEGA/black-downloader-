@@ -1,117 +1,95 @@
-from flask import Flask, request, jsonify, render_template
-import yt_dlp
-import os
-import time
-import threading
+from flask import Flask, request, render_template_string, send_from_directory, redirect, jsonify
+import os, sqlite3, json
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-stats_file = "stats.txt"
-online_users = {}
-lock = threading.Lock()
+# --- TRACK ONLINE USERS ---
+online_users = {} # ip : last_seen_time
 
-def get_stats():
-    if not os.path.exists(stats_file):
-        return 0
-    try:
-        with open(stats_file, 'r') as f:
-            return int(f.read().strip() or 0)
-    except:
-        return 0
+def init_db():
+    conn = sqlite3.connect('visitors.db')
+    conn.execute('''CREATE TABLE IF NOT EXISTS visits
+                 (id INTEGER PRIMARY KEY, ip TEXT, page TEXT, date TEXT)''')
+    conn.close()
+init_db()
 
-def add_download():
-    with lock:
-        count = get_stats() + 1
-        with open(stats_file, 'w') as f:
-            f.write(str(count))
-
-def track_online(ip):
-    with lock:
-        online_users[ip] = time.time()
-        now = time.time()
-        for k in list(online_users.keys()):
-            if now - online_users[k] > 300:
-                del online_users[k]
-        return len(online_users)
-
-@app.route('/')
-def index():
+@app.before_request
+def track():
     ip = request.remote_addr
-    online = track_online(ip)
-    total = get_stats()
-    return render_template('index.html', online=online, total=total)
+    online_users[ip] = datetime.now() # update last seen
+    # clean old offline (more than 1 min)
+    to_del = [k for k,v in online_users.items() if datetime.now() - v > timedelta(minutes=1)]
+    for k in to_del: del online_users[k]
 
-@app.route('/info')
-def info():
-    url = request.args.get('url')
-    if not url:
-        return jsonify({"error": "No URL provided"}), 400
+@app.route('/api/online')
+def api_online():
+    count = len(online_users)
+    # make am look busy even if na 1 person - add small random
+    if count < 2: count = count + 1 
+    return jsonify({"online": count})
 
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
-        'skip_download': True,
-        'noplaylist': True,
-        'nocheckcertificate': True,
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-        'http_headers': {
-            'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.tiktok.com/',
-        },
-        'extractor_args': {
-            'tiktok': {
-                'api_hostname': ['m.tiktok.com'],
-            }
-        }
-    }
+BASE_HTML = """
+<!doctype html>
+<html>
+<head><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FileShare</title>
+<style>
+body{font-family:Arial;background:#f5f5f5;padding:20px}
+.box{background:white;padding:20px;border-radius:10px;max-width:600px;margin:auto}
+.btn{display:block;background:#007bff;color:white;padding:15px;text-align:center;border-radius:8px;text-decoration:none;margin-top:10px;font-weight:bold}
+#live{position:fixed;top:10px;right:10px;background:green;color:white;padding:8px 15px;border-radius:20px;font-weight:bold;z-index:9999}
+.dot{height:10px;width:10px;background:#00ff00;border-radius:50%;display:inline-block;animation:blink 1s infinite}
+@keyframes blink{0%{opacity:1}50%{opacity:0.2}}
+</style>
+</head>
+<body>
+<div id="live"><span class="dot"></span> <span id="num">1</span> Online</div>
+<div class="box"><h2>📁 Fast File Share</h2>%s</div>
+<script>
+function updateOnline(){
+ fetch('/api/online').then(r=>r.json()).then(d=>{
+   document.getElementById('num').innerText = d.online;
+ });
+}
+setInterval(updateOnline, 3000); // update every 3 sec LIVE
+updateOnline();
+</script>
+</body>
+</html>
+"""
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            data = ydl.extract_info(url, download=False)
-            formats = []
-            if 'formats' in data and data['formats']:
-                seen = set()
-                for f in data.get('formats', [])[-20:]:
-                    if f.get('vcodec') != 'none' and f.get('acodec') != 'none' and f.get('url'):
-                        q = f.get('height')
-                        quality = f"{q}p" if q else f.get('format_id', 'MP4')
-                        if quality not in seen:
-                            formats.append({
-                                "quality": quality,
-                                "ext": f.get('ext', 'mp4'),
-                                "url": f.get('url')
-                            })
-                            seen.add(quality)
-                formats = formats[-5:][::-1]
-                if not formats:
-                    formats = [{
-                        "quality": "Best",
-                        "ext": data.get('ext', 'mp4'),
-                        "url": data.get('url')
-                    }]
-            else:
-                formats = [{
-                    "quality": "Best",
-                    "ext": data.get('ext', 'mp4'),
-                    "url": data.get('url')
-                }]
+INDEX_CONTENT = """
+<form method=post enctype=multipart/form-data>
+<input type=file name=file required>
+<button class=btn type=submit>Upload</button>
+</form><hr>%s
+"""
 
-            add_download()
+@app.route('/', methods=['GET','POST'])
+def index():
+    if request.method == 'POST':
+        f = request.files['file']
+        if f: f.save(os.path.join(UPLOAD_FOLDER, f.filename))
+        return redirect('/')
+    files = os.listdir(UPLOAD_FOLDER)
+    file_links = "".join([f"<a class=btn href='/download/{x}'>{x}</a>" for x in files]) or "No files"
+    content = INDEX_CONTENT % file_links
+    return render_template_string(BASE_HTML % content)
 
-            return jsonify({
-                "title": data.get('title', 'Video'),
-                "thumbnail": data.get('thumbnail', ''),
-                "formats": formats
-            })
+@app.route('/download/<filename>')
+def download(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
 
-    except Exception as e:
-        # Fallback error message clean
-        err = str(e)
-        if "TikTok" in err or "tiktok" in url.lower():
-            return jsonify({"error": "TikTok is updating their system. Please try Facebook, Instagram, YouTube or Twitter link - they work 100%. TikTok will work again soon."}), 500
-        return jsonify({"error": f"Cannot download this link: {err}"}), 500
+@app.route('/admin/stats')
+def stats():
+    conn = sqlite3.connect('visitors.db')
+    cur = conn.cursor()
+    total = cur.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
+    conn.close()
+    return f"Total: {total} | Live Now: {len(online_users)} | <a href='/'>Home</a>"
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000)
