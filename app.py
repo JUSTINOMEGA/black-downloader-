@@ -3,24 +3,15 @@ import yt_dlp
 import os
 import json
 import tempfile
-from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "black_final_v2"
+app.secret_key = "black_final_v3"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 COOKIE_FILE = os.path.join(BASE_DIR, "cookies.txt")
 
 print("=== BLACK DOWNLOADER STARTING ===")
-print(f"Looking for cookies at: {COOKIE_FILE}")
-print(f"Cookie file exists? {os.path.exists(COOKIE_FILE)}")
-if os.path.exists(COOKIE_FILE):
-    print(f"Cookie size: {os.path.getsize(COOKIE_FILE)} bytes")
-    with open(COOKIE_FILE,'r') as f:
-        lines = f.readlines()
-        print(f"Cookie lines: {len(lines)}")
-else:
-    print("!!! NO COOKIES.TXT FOUND - YOUTUBE WILL FAIL !!!")
+print(f"Cookie exists? {os.path.exists(COOKIE_FILE)}")
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -75,15 +66,15 @@ def get_ydl_opts():
         'no_warnings': False,
         'noplaylist': True,
         'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-        'extractor_args': {'youtube': {'player_client': ['android'], 'player_skip': ['webpage','configs']}},
-        'user_agent': 'com.google.android.youtube/19.09.36 (Linux; U; Android 11) gzip',
+        'extractor_args': {'youtube': {'player_client': ['android','ios','web']}},
         'retries': 3,
+        'fragment_retries': 3,
     }
     if os.path.exists(COOKIE_FILE):
         print(f">>> USING COOKIE FILE: {COOKIE_FILE}")
         opts['cookiefile'] = COOKIE_FILE
     else:
-        print(">>> NO COOKIE FILE - WILL FAIL FOR YOUTUBE")
+        print(">>> NO COOKIE FILE")
     return opts
 
 @app.route('/')
