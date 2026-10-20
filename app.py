@@ -47,6 +47,10 @@ def info():
     if not url:
         return jsonify({"error": "No URL provided"}), 400
 
+    # BLOCK YOUTUBE
+    if "youtube.com" in url.lower() or "youtu.be" in url.lower():
+        return jsonify({"error": "YouTube download is disabled. Please use TikTok, Facebook, Instagram or Twitter links."}), 400
+
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
@@ -106,10 +110,9 @@ def info():
             })
 
     except Exception as e:
-        # Fallback error message clean
         err = str(e)
         if "TikTok" in err or "tiktok" in url.lower():
-            return jsonify({"error": "TikTok is updating their system. Please try Facebook, Instagram, YouTube or Twitter link - they work 100%. TikTok will work again soon."}), 500
+            return jsonify({"error": "TikTok is updating their system. Please try Facebook, Instagram or Twitter link - they work 100%."}), 500
         return jsonify({"error": f"Cannot download this link: {err}"}), 500
 
 if __name__ == '__main__':
