@@ -1,28 +1,15 @@
 from flask import Flask, request, jsonify, render_template
 import yt_dlp
-import requests
+import os
 
 app = Flask(__name__)
 
-# Only allow these
-ALLOWED = ["facebook.com", "fb.watch", "tiktok.com", "instagram.com", "moviebox", "movb", "fb.com"]
+# For ad and stats
+STATS = {"total_downloads": 12483, "online": 127}
 
-COBALT_API = "https://api.cobalt.tools/api/json"
-COBALT = ["facebook.com", "fb.watch", "tiktok.com", "instagram.com", "fb.com"]
-
-def is_allowed(url):
-    url = url.lower()
-    return any(x in url for x in ALLOWED)
-
-def cobalt_download(url):
-    try:
-        r = requests.post(COBALT_API, json={"url": url, "vCodec": "h264", "vQuality": "720"}, 
-                           headers={"Accept":"application/json","Content-Type":"application/json"}, timeout=15)
-        data = r.json()
-        if data.get("status") in ["redirect","tunnel","picker"]:
-            return data.get("url")
-    except:
-        pass
+def get_cookies_file():
+    if os.path.exists("cookies.txt"):
+        return "cookies.txt"
     return None
 
 @app.route("/")
@@ -31,41 +18,66 @@ def index():
 
 @app.route("/info")
 def info():
-    url = request.args.get("url","")
-    if not url or not is_allowed(url):
-        return jsonify({"error":"Only Facebook, TikTok, Instagram and MovieBox links allowed"}), 400
+    url = request.args.get("url")
+    if not url:
+        return jsonify({"error": "No URL"}), 400
+    
+    STATS["total_downloads"] += 1
+    
+    ydl_opts = {
+        "quiet": True,
+        "skip_download": True,
+        "no_warnings": True,
+    }
+    cookie = get_cookies_file()
+    if cookie:
+        ydl_opts["cookiefile"] = cookie
 
-    # FB / IG / TikTok via Cobalt
-    if any(x in url.lower() for x in COBALT):
-        direct = cobalt_download(url)
-        if direct:
-            return jsonify({
-                "title": "Video",
-                "thumbnail": "",
-                "formats": [{"format_id":"cobalt","ext":"mp4","quality":"720p - MP4","url":direct}]
-            })
-
-    # MovieBox via yt-dlp
     try:
-        ydl_opts = {'quiet': True, 'noplaylist': True, 'nocheckcertificate': True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
+            data = ydl.extract_info(url, download=False)
+            
             formats = []
-            for f in info.get("formats", [])[-10:]:
-                if f.get("url"):
-                    formats.append({
-                        "format_id": f.get("format_id"),
-                        "ext": f.get("ext"),
-                        "quality": f"{f.get('height','')}p - {f.get('ext')}",
-                        "url": f.get("url")
-                    })
+            # Best video
+            if "formats" in data:
+                # Get best mp4s
+                best = []
+                for f in data["formats"]:
+                    if f.get("vcodec") != "none" and f.get("ext") in ["mp4", "m4a", "mp3"]:
+                        qual = f.get("format_note") or f.get("height") or "HD"
+                        formats.append({
+                            "quality": f"{qual} - {f.get('ext')}",
+                            "url": f.get("url"),
+                            "ext": f.get("ext")
+                        })
+                formats = sorted(formats, key=lambda x: x["quality"], reverse=True)[:8]
+
+            # Fallback direct url
+            if not formats:
+                formats.append({
+                    "quality": "HD Video",
+                    "url": data.get("url"),
+                    "ext": "mp4"
+                })
+                formats.append({
+                    "quality": "MP3 Audio",
+                    "url": data.get("url"),
+                    "ext": "mp3"
+                })
+
             return jsonify({
-                "title": info.get("title","MovieBox Video"),
-                "thumbnail": info.get("thumbnail",""),
-                "formats": formats[::-1]
+                "title": data.get("title", "Black Video"),
+                "thumbnail": data.get("thumbnail", ""),
+                "formats": formats,
+                "total": STATS["total_downloads"],
+                "online": STATS["online"]
             })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/stats")
+def stats():
+    return jsonify(STATS)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
