@@ -3,101 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Black Downloader - Download Any Video No Watermark</title>
+<title>BLACK - #1 Video Downloader</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#0f0f0f;color:white;min-height:100vh;padding:15px}
-.container{max-width:500px;margin:auto}
-.header{text-align:center;padding:20px 0}
-.header h1{font-size:28px;font-weight:900}
-.header h1 span{color:#00ff88}
-.badge{display:inline-block;background:#00ff88;color:#000;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;margin-top:8px}
-.card{background:#1a1a1a;border-radius:16px;padding:20px;margin-top:15px;border:1px solid #333}
-.input-box{display:flex;background:#222;border-radius:10px;padding:5px;border:1px solid #444}
-.input-box input{flex:1;background:transparent;border:none;color:white;padding:12px;outline:none}
-.input-box button{background:#00ff88;color:#000;border:none;padding:12px 18px;border-radius:8px;font-weight:bold;cursor:pointer}
-.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px;text-align:center}
-.platforms div{background:#222;padding:12px 5px;border-radius:10px;font-size:12px}
-.platforms div span{font-size:20px;display:block}
-.stats{display:flex;justify-content:space-around;margin-top:15px;background:#222;padding:12px;border-radius:10px;font-size:14px}
-.result{display:none;margin-top:20px;text-align:center}
-.result img{width:100%;border-radius:10px;max-height:250px;object-fit:cover}
-.download-btns a{display:block;background:#00ff88;color:#000;padding:14px;border-radius:10px;margin-top:10px;text-decoration:none;font-weight:bold}
-.error{color:#ff4444;margin-top:15px;text-align:center;display:none}
-#live{position:fixed;top:10px;right:10px;background:green;color:white;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:bold}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}
+body{background:#070709;color:#fff;min-height:100vh}
+.topbar{padding:15px 25px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #111}
+.topbar b{font-size:13px;letter-spacing:0.5px}
+.topbar b span{color:#ff1a1a}
+.live-dot{font-size:9px;color:#00ff88;letter-spacing:1px}
+.hero{text-align:center;margin-top:35px}
+.live-badge{font-size:8px;background:#0a1f14;color:#00ff88;border:1px solid #123a23;padding:4px 10px;border-radius:20px;letter-spacing:1px}
+.hero h1{font-size:28px;font-weight:900;margin-top:15px;letter-spacing:-0.5px}
+.hero h1 span:nth-child(1){color:#ff2a2a}
+.hero h1 span:nth-child(2){color:#ff8a00}
+.hero p{color:#666;font-size:11px;margin-top:8px}
+.platform-tags{margin-top:15px;display:flex;gap:8px;justify-content:center}
+.platform-tags div{background:#151515;border:1px solid #222;padding:5px 10px;border-radius:20px;font-size:10px;color:#888}
+.stats{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.stat{background:#121214;border:1px solid #1f1f1f;padding:8px 18px;border-radius:10px;text-align:center;min-width:80px}
+.stat b{display:block;color:#ff4d8a;font-size:13px}
+.stat span{font-size:8px;color:#666}
+.card{max-width:420px;margin:20px auto;background:#121214;border:1px solid #1e1e20;border-radius:14px;padding:14px}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;background:#0a0a0b;border:1px solid #222;border-radius:8px;padding:12px;color:#fff;font-size:12px;outline:none}
+.input-row button{background:#1a1a1c;border:1px solid #2a2a2a;color:#aaa;padding:0 12px;border-radius:8px;font-size:9px;cursor:pointer}
+.quality-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.q{background:#1a1a1c;border:1px solid #252528;border-radius:8px;padding:10px;text-align:center;cursor:pointer}
+.q.active{border-color:#ff2a2a;box-shadow:0 0 10px rgba(255,0,0,0.3)}
+.q b{display:block;font-size:9px}
+.q span{font-size:7px;color:#666}
+.download-btn{width:100%;margin-top:12px;background:linear-gradient(90deg,#ff0033,#ff6a00);border:none;padding:13px;border-radius:8px;font-weight:800;font-size:11px;color:white;cursor:pointer;box-shadow:0 0 20px rgba(255,0,0,0.4)}
+.recent{max-width:420px;margin:12px auto;background:#121214;border:1px solid #1e1e20;border-radius:12px;padding:12px}
+.recent h4{font-size:8px;color:#ff8ab3;letter-spacing:1px}
+.recent-box{margin-top:8px;background:#0a0a0b;border:1px solid #1a1a1a;border-radius:8px;padding:10px;font-size:10px;color:#555;min-height:35px}
+.follow{max-width:420px;margin:12px auto;background:#121214;border:1px solid #1e1e20;border-radius:12px;padding:14px;text-align:center}
+.follow p{font-size:7px;letter-spacing:1.5px;color:#777}
+.icons{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.icons a{width:28px;height:28px;border-radius:50%;border:1px solid #ff4d8a;color:#ff4d8a;display:flex;align-items:center;justify-content:center;font-size:12px;text-decoration:none}
+#thumbWrap{display:none;margin-top:12px;text-align:center}
+#thumbWrap img{width:100%;border-radius:8px}
 </style>
 <script data-cfasync="false" src="https://accountut.com/1/87e172de6eacde98194e479419b0040d"></script>
 <script data-cfasync="false" src="https://bellnewyork.org/14/ec5cf818a8aaeaa6ab2ab10d72065ce4"></script>
 </head>
 <body>
-<div id="live">🟢 <span id="online">{{ online }}</span> Online</div>
 
-<div class="container">
-<div class="header">
-<h1><span>BLACK</span> DOWNLOADER</h1>
-<div class="badge">🔥 NO WATERMARK</div>
-<p style="margin-top:10px;color:#aaa;font-size:14px">Download Videos Fast & Free</p>
-</div>
+<div class="topbar"><b>BLACK <span>DOWNLOADER</span></b> <div class="live-dot">● LIVE</div></div>
 
-<div class="card">
-<div class="input-box">
-<input id="url" placeholder="Paste video link here...">
-<button onclick="getVideo()">Paste</button>
-</div>
+<div class="hero">
+<div class="live-badge">● LIVE - 128 REAL USERS - SECURE</div>
+<h1>DOWNLOAD <span>ANYTHING</span> <span>IN 2 SECONDS</span></h1>
+<p>Paste any TikTok, Instagram, Facebook link. Downloads Goes Directly To Your Device!</p>
 
-<div class="platforms">
-<div><span>🎵</span>TikTok</div>
-<div><span>📘</span>Facebook</div>
-<div><span>📸</span>Instagram</div>
-<div><span>🐦</span>Twitter</div>
+<div class="platform-tags">
+<div><i class="fab fa-tiktok"></i> TikTok</div>
+<div><i class="fab fa-instagram"></i> Instagram</div>
+<div><i class="fab fa-facebook"></i> Facebook</div>
+<div><i class="fab fa-twitter"></i> Twitter</div>
 </div>
 
 <div class="stats">
-<div>📥 {{ total }} Downloads</div>
-<div>👁️ {{ online }} Online</div>
+<div class="stat"><b>128</b><span>Total Users</span></div>
+<div class="stat"><b id="totalDl">{{ total }}</b><span>Downloads Today</span></div>
+<div class="stat"><b>4.9★</b><span>Rating</span></div>
+</div>
 </div>
 
-<div id="error" class="error"></div>
+<div class="card">
+<div class="input-row">
+<input id="url" placeholder="Paste video link here...">
+<button onclick="pasteLink()">PASTE</button>
+</div>
 
-<div id="result" class="result">
+<div class="quality-row">
+<div class="q active" onclick="setQ(this)"><b>BEST QUALITY</b><span>Full HD</span></div>
+<div class="q" onclick="setQ(this)"><b>FAST</b><span>Quick Save</span></div>
+<div class="q" onclick="setQ(this)"><b>MP3 AUDIO</b><span>Audio Only</span></div>
+</div>
+
+<button class="download-btn" onclick="downloadNow()">DOWNLOAD TO MY PHONE →</button>
+
+<div id="thumbWrap">
 <img id="thumb" src="">
-<h3 id="title" style="margin:15px 0"></h3>
-<div id="btns" class="download-btns"></div>
+<p id="vtitle" style="font-size:11px;margin-top:8px;color:#ccc"></p>
+<div id="btns"></div>
 </div>
 
-<p style="text-align:center;color:#555;margin-top:20px;font-size:12px">Supported: TikTok, Facebook, Instagram, Twitter • No Watermark</p>
+<p id="msg" style="font-size:11px;color:#ff4d4d;text-align:center;margin-top:10px;display:none"></p>
+</div>
+
+<div class="recent">
+<h4>● RECENT DOWNLOADS (Personal for each user)</h4>
+<div class="recent-box" id="recentBox">No downloads yet. Paste link to start!</div>
+</div>
+
+<div class="follow">
+<p>FOLLOW US FOR MORE HOT VIDEOS TO DOWNLOAD WITH BEST WATERMARK</p>
+<div class="icons">
+<a href="#"><i class="fab fa-facebook-f"></i></a>
+<a href="#"><i class="fab fa-whatsapp"></i></a>
+<a href="#"><i class="fab fa-tiktok"></i></a>
+<a href="#"><i class="fab fa-instagram"></i></a>
+<a href="#"><i class="fab fa-telegram"></i></a>
+<a href="#"><i class="fab fa-youtube"></i></a>
+</div>
 </div>
 
 <script>
-async function getVideo(){
+let selectedQuality = "best";
+function setQ(el){
+ document.querySelectorAll('.q').forEach(e=>e.classList.remove('active'));
+ el.classList.add('active');
+ selectedQuality = el.querySelector('b').innerText;
+}
+async function pasteLink(){
+ try{
+  const text = await navigator.clipboard.readText();
+  document.getElementById('url').value = text;
+ }catch{ alert('Paste manually'); }
+}
+async function downloadNow(){
  let url = document.getElementById('url').value.trim();
- if(!url){
-   url = await navigator.clipboard.readText().catch(()=> '');
-   document.getElementById('url').value = url;
-   if(!url) return alert('Paste video link first');
+ if(!url) return alert('Paste link first');
+ if(url.includes('youtube.com') || url.includes('youtu.be')){
+   document.getElementById('msg').style.display='block';
+   document.getElementById('msg').innerText='YouTube is disabled. Use TikTok, Instagram, Facebook or Twitter.';
+   return;
  }
- document.getElementById('error').style.display='none';
- document.getElementById('result').style.display='none';
- document.getElementById('error').innerText='⏳ Loading...';
- document.getElementById('error').style.display='block';
-
+ document.getElementById('msg').style.display='block';
+ document.getElementById('msg').style.color='#00ff88';
+ document.getElementById('msg').innerText='⏳ Fetching...';
  try{
   let res = await fetch('/info?url='+encodeURIComponent(url));
   let data = await res.json();
   if(data.error) throw new Error(data.error);
-  
   document.getElementById('thumb').src = data.thumbnail;
-  document.getElementById('title').innerText = data.title;
-  let btnsHtml = '';
+  document.getElementById('vtitle').innerText = data.title;
+  document.getElementById('thumbWrap').style.display='block';
+  let html='';
   data.formats.forEach(f=>{
-    btnsHtml += `<a href="${f.url}" target="_blank" download>📥 Download ${f.quality} (${f.ext})</a>`;
+   html+=`<a href="${f.url}" target="_blank" style="display:block;background:#1a1a1c;border:1px solid #333;padding:12px;border-radius:8px;margin-top:8px;color:#fff;text-decoration:none;font-size:11px;font-weight:bold">📥 DOWNLOAD ${f.quality} - Click Here</a>`;
   });
-  document.getElementById('btns').innerHTML = btnsHtml;
-  document.getElementById('result').style.display='block';
-  document.getElementById('error').style.display='none';
+  document.getElementById('btns').innerHTML=html;
+  document.getElementById('msg').style.display='none';
+  document.getElementById('recentBox').innerText = '✅ '+data.title+' - Ready!';
+  // scroll
+  document.getElementById('thumbWrap').scrollIntoView({behavior:'smooth'});
  }catch(e){
-  document.getElementById('error').innerText = e.message;
-  document.getElementById('error').style.display='block';
+  document.getElementById('msg').style.display='block';
+  document.getElementById('msg').style.color='#ff4d4d';
+  document.getElementById('msg').innerText=e.message;
  }
 }
 </script>
