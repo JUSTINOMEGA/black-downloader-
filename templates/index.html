@@ -1,128 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Black Downloader - All Platforms</title>
+<title>Black Video Downloader</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial;background:#070707;color:#fff}
-.header{padding:15px;display:flex;justify-content:space-between;align-items:center;background:#0f0f0f;border-bottom:1px solid #222}
-.live{color:#00ff88;font-size:12px}
-.live b{animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1} 50%{opacity:.3}}
-.container{max-width:600px;margin:0 auto;padding:20px}
-.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}
-.p{ background:#151515;border:1px solid #222;border-radius:12px;padding:12px 5px;text-align:center;font-size:12px;cursor:pointer }
-.p:hover{border-color:#fff}
-.p span{font-size:22px;display:block}
-.search-box{background:#151515;border-radius:18px;padding:20px;margin:20px 0;border:1px solid #222}
-.search-box input{width:100%;padding:16px;border-radius:12px;border:none;background:#000;color:#fff;font-size:16px;outline:none}
-.btn{width:100%;padding:16px;background:#fff;color:#000;border:none;border-radius:12px;font-weight:bold;margin-top:12px;font-size:16px;cursor:pointer}
-.stats{display:flex;justify-content:space-between;font-size:12px;color:#888;margin:10px 0}
-.stats b{color:#fff}
-.ad-box{background:#1a1a1a;border:1px dashed #333;border-radius:12px;padding:20px;margin:15px 0;text-align:center;color:#666;font-size:13px}
-#result{background:#151515;border-radius:15px;padding:15px;margin-top:15px;display:none}
-.thumb{width:100%;border-radius:12px;margin:10px 0}
-.dl{display:flex;gap:10px;margin:8px 0}
-.dl a{flex:1;background:#fff;color:#000;padding:12px;border-radius:10px;text-align:center;text-decoration:none;font-weight:bold;font-size:14px}
-.dl a.mp3{background:#00ff88}
-.history{background:#151515;border-radius:12px;padding:15px;margin-top:20px}
-.history h4{font-size:14px;margin-bottom:10px}
-.history-item{font-size:12px;padding:8px;border-bottom:1px solid #222;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body{background:#0b0b0b;color:#fff;font-family:Arial;text-align:center;padding:20px}
+input{width:90%;max-width:500px;padding:14px;border-radius:10px;border:none;font-size:16px}
+button{padding:12px 25px;background:#ff0040;color:#fff;border:none;border-radius:10px;margin-top:10px;font-weight:bold;cursor:pointer}
+.platforms{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
+.p{background:#1c1c1c;padding:12px 18px;border-radius:12px;width:110px;text-align:center;text-decoration:none;color:#fff;display:block}
+.p span{font-size:28px;display:block;margin-bottom:5px}
+#result{margin-top:25px}
+a.down{display:block;background:#222;padding:10px;margin:8px auto;max-width:400px;border-radius:8px;color:#0f0;text-decoration:none}
 </style>
 </head>
 <body>
-<div class="header">
- <b>BLACK DOWNLOADER</b>
- <div class="live"><b>●</b> <span id="online">127</span> Online | <span id="total">12,483</span> Downloads</div>
+
+<h2>🔥 BLACK VIDEO DOWNLOADER</h2>
+<p id="stats">{{ total }} Downloads | {{ online }} Online</p>
+
+<input id="url" placeholder="Paste video link here...">
+<br>
+<button onclick="getVideo()">DOWNLOAD</button>
+
+<div class="platforms">
+  <a class="p" href="https://facebook.com" target="_blank"><span>📘</span>Facebook</a>
+  <a class="p" href="https://tiktok.com" target="_blank"><span>🎵</span>TikTok</a>
+  <a class="p" href="https://instagram.com" target="_blank"><span>📸</span>Instagram</a>
+  <a class="p" href="https://t.me" target="_blank"><span>✈️</span>Telegram</a>
+  <a class="p" href="https://youtube.com" target="_blank"><span>▶️</span>YouTube</a>
+  <a class="p" href="https://twitter.com" target="_blank"><span>🐦</span>Twitter</a>
 </div>
 
-<div class="container">
- <!-- ADS TOP -->
- <div class="ad-box">YOUR ADS HERE - Top Banner (Paste Adsterra/Monetag code here)</div>
-
- <div class="platforms">
-  <div class="p" onclick="setEg('facebook.com/')"><span>📘</span>Facebook</div>
-  <div class="p" onclick="setEg('tiktok.com/')"><span>🎵</span>TikTok</div>
-  <div class="p" onclick="setEg('instagram.com/')"><span>📸</span>Instagram</div>
-  <div class="p" onclick="setEg('t.me/')"><span>✈️</span>Telegram</div>
-  <div class="p" onclick="setEg('youtube.com/')"><span>▶️</span>YouTube</div>
-  <div class="p" onclick="setEg('moviebox')"><span>🎬</span>MovieBox</div>
-  <div class="p" onclick="setEg('twitter.com/')"><span>🐦</span>Twitter</div>
-  <div class="p" onclick="setEg('')"><span>🌐</span>Chrome</div>
- </div>
-
- <div class="search-box">
-  <input id="url" placeholder="Paste link from Facebook, TikTok, IG, Telegram...">
-  <button class="btn" onclick="getVideo()">⚡ FAST DOWNLOAD</button>
-  <div class="stats">
-   <span>⚡ Fast Download</span><span>🎥 HD / 🎵 MP3</span><span>👤 Personal History</span>
-  </div>
- </div>
-
- <!-- ADS MIDDLE -->
- <div class="ad-box">YOUR ADS HERE - Middle Banner (For your money)</div>
-
- <div id="result"></div>
-
- <div class="history">
-  <h4>📜 Personal History</h4>
-  <div id="hist">No downloads yet</div>
- </div>
-
- <div class="ad-box">YOUR ADS HERE - Bottom Banner</div>
-</div>
+<div id="result"></div>
 
 <script>
-let historyList = JSON.parse(localStorage.getItem('bd_hist')||'[]');
-renderHist();
-
-function setEg(t){
- document.getElementById('url').value='https://'+t;
- document.getElementById('url').focus();
-}
-
 async function getVideo(){
- let url=document.getElementById('url').value.trim();
- if(!url){alert('Paste link first');return;}
- let resDiv=document.getElementById('result');
- resDiv.style.display='block';
- resDiv.innerHTML='⏳ Fetching video...';
- try{
-  let r=await fetch('/info?url='+encodeURIComponent(url));
-  let d=await r.json();
-  if(d.error){resDiv.innerHTML='❌ '+d.error;return;}
-  
-  // save history
-  historyList.unshift({title:d.title, url:url, time:new Date().toLocaleTimeString()});
-  localStorage.setItem('bd_hist', JSON.stringify(historyList.slice(0,20)));
-  renderHist();
-
-  document.getElementById('online').innerText=d.online;
-  document.getElementById('total').innerText=d.total.toLocaleString();
-
-  let html=`<h3>${d.title}</h3>`;
-  if(d.thumbnail) html+=`<img class="thumb" src="${d.thumbnail}">`;
-  d.formats.forEach(f=>{
-   let cls = f.ext.includes('mp3')||f.ext.includes('m4a') ? 'mp3' : '';
-   html+=`<div class="dl"><a class="${cls}" href="${f.url}" target="_blank">DOWNLOAD ${f.quality.toUpperCase()}</a></div>`;
-  });
-  resDiv.innerHTML=html;
- }catch(e){resDiv.innerHTML='Error: '+e;}
+  let u = document.getElementById('url').value.trim();
+  if(!u){ alert("Paste link first"); return; }
+  document.getElementById('result').innerHTML = "Loading...";
+  try{
+    let res = await fetch('/info?url=' + encodeURIComponent(u));
+    let data = await res.json();
+    if(data.error){ document.getElementById('result').innerHTML = data.error; return; }
+    let html = `<h3>${data.title}</h3>`;
+    if(data.thumbnail) html += `<img src="${data.thumbnail}" style="width:90%;max-width:400px;border-radius:10px"><br>`;
+    data.formats.forEach(f=>{
+      html += `<a class="down" href="${f.url}" target="_blank">Download ${f.quality} - ${f.ext}</a>`;
+    });
+    document.getElementById('result').innerHTML = html;
+  }catch(e){
+    document.getElementById('result').innerHTML = "Error: " + e;
+  }
 }
-
-function renderHist(){
- let h=document.getElementById('hist');
- if(!historyList.length){h.innerHTML='No downloads yet';return;}
- h.innerHTML=historyList.map(i=>`<div class="history-item">✅ ${i.title}</div>`).join('');
-}
-
-// fake live count
-setInterval(()=>{
- let o=document.getElementById('online');
- o.innerText= 100 + Math.floor(Math.random()*80);
-}, 5000);
 </script>
+
 </body>
 </html>
