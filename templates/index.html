@@ -1,100 +1,96 @@
-from flask import Flask, request, jsonify, render_template
-import yt_dlp
-import os
-import time
-import threading
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Black Video Downloader - Fast & Free</title>
 
-app = Flask(__name__)
+<!-- ADSTERRA POPUNDER - DON'T REMOVE -->
+<script data-cfasync="false" src="https://accountut.com/1/87e172de6eacde98194e479419b0040d"></script>
 
-# Stats
-stats_file = "stats.txt"
-online_users = {}
-lock = threading.Lock()
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080808;color:#fff;font-family:Arial,sans-serif;text-align:center;padding-bottom:90px}
+.header{padding:12px 15px;background:#111;display:flex;justify-content:space-between;align-items:center;font-size:14px;position:sticky;top:0;z-index:99;border-bottom:1px solid #222}
+.live{color:#00ff66;font-weight:bold;display:flex;align-items:center}
+.live span{width:8px;height:8px;background:#00ff66;display:inline-block;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #00ff66;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.main{padding:25px 15px}
+h1{font-size:28px;margin:0 0 5px 0}
+.sub{color:#aaa;margin-bottom:18px;font-size:14px}
+.box{background:#151515;max-width:600px;margin:0 auto;padding:20px;border-radius:16px;border:1px solid #222}
+input{width:100%;padding:16px;border-radius:12px;border:1px solid #333;background:#0e0e0e;color:#fff;font-size:16px;outline:none}
+input:focus{border-color:#00ff66}
+button{width:100%;margin-top:12px;padding:15px;background:#00ff66;color:#000;border:none;border-radius:12px;font-weight:bold;font-size:18px;cursor:pointer}
+button:active{transform:scale(.98)}
+.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;max-width:600px;margin-left:auto;margin-right:auto}
+.p{background:#1a1a1a;padding:14px 5px;border-radius:12px;font-size:13px;text-decoration:none;color:#fff;border:1px solid #252525;display:block}
+.p span{font-size:26px;display:block;margin-bottom:4px}
+#result{margin-top:20px;max-width:600px;margin-left:auto;margin-right:auto;text-align:left}
+.vcard{background:#151515;border-radius:14px;padding:15px;border:1px solid #222}
+.vcard img{width:100%;border-radius:10px;margin-bottom:10px}
+a.down{display:block;background:#00ff66;color:#000;padding:12px;text-align:center;border-radius:10px;margin-top:8px;text-decoration:none;font-weight:bold}
+a.down:nth-child(even){background:#222;color:#00ff66;border:1px solid #333}
+</style>
+</head>
+<body>
 
-def get_stats():
-    if not os.path.exists(stats_file):
-        return 0
-    try:
-        with open(stats_file, 'r') as f:
-            return int(f.read().strip() or 0)
-    except:
-        return 0
+<div class="header">
+<div>🔥 BLACK DOWNLOADER</div>
+<div class="live"><span></span>{{ online }} Online</div>
+</div>
 
-def add_download():
-    with lock:
-        count = get_stats() + 1
-        with open(stats_file, 'w') as f:
-            f.write(str(count))
+<div class="main">
+<h1>All Video Downloader</h1>
+<div class="sub">{{ total }}+ Videos Downloaded • Fast • No Watermark</div>
 
-def track_online(ip):
-    with lock:
-        online_users[ip] = time.time()
-        # Clean old (5 mins)
-        now = time.time()
-        for k in list(online_users.keys()):
-            if now - online_users[k] > 300:
-                del online_users[k]
-        return len(online_users)
+<div class="box">
+<input id="url" placeholder="Paste Facebook, TikTok, IG, YouTube, Telegram link...">
+<button onclick="getVideo()">DOWNLOAD NOW</button>
+</div>
 
-@app.route('/')
-def index():
-    ip = request.remote_addr
-    online = track_online(ip)
-    total = get_stats()
-    return render_template('index.html', online=online, total=total)
+<div class="platforms">
+<a class="p" href="#"><span>📘</span>Facebook</a>
+<a class="p" href="#"><span>🎵</span>TikTok</a>
+<a class="p" href="#"><span>📸</span>Instagram</a>
+<a class="p" href="#"><span>✈️</span>Telegram</a>
+<a class="p" href="#"><span>▶️</span>YouTube</a>
+<a class="p" href="#"><span>🐦</span>Twitter</a>
+<a class="p" href="#"><span>🎬</span>MovieBox</a>
+<a class="p" href="#"><span>🌐</span>Chrome</a>
+</div>
 
-@app.route('/info')
-def info():
-    url = request.args.get('url')
-    if not url:
-        return jsonify({"error": "No URL provided"}), 400
+<div id="result"></div>
+</div>
 
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
-        'skip_download': True,
-        'noplaylist': True,
-        'extractor_args': {'youtube': {'skip': ['hls', 'dash']}},
-    }
+<script>
+async function getVideo(){
+let u = document.getElementById('url').value.trim();
+if(!u){ alert("Paste link first!"); return; }
+document.getElementById('result').innerHTML = "<div style='color:#00ff66;text-align:center'>⏳ Getting video...</div>";
+try{
+let res = await fetch('/info?url=' + encodeURIComponent(u));
+let data = await res.json();
+if(data.error){
+document.getElementById('result').innerHTML = "<div style='background:#2a1111;padding:12px;border-radius:10px;color:#ff6b6b;text-align:center'>❌ "+data.error+"</div>";
+return;
+}
+let html = '<div class="vcard">';
+if(data.thumbnail) html += '<img src="'+data.thumbnail+'">';
+html += '<div style="font-weight:bold;margin-bottom:10px">'+data.title+'</div>';
+data.formats.forEach(f=>{
+html += '<a class="down" href="'+f.url+'" target="_blank">⬇ Download '+f.quality+'</a>';
+});
+html += '</div>';
+document.getElementById('result').innerHTML = html;
+}catch(e){
+document.getElementById('result').innerHTML = "❌ Error: " + e.message;
+}
+}
+</script>
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            data = ydl.extract_info(url, download=False)
-            
-            formats = []
-            # Get best formats
-            if 'formats' in data:
-                seen = set()
-                for f in data.get('formats', [])[-15:]:
-                    if f.get('vcodec') != 'none' and f.get('acodec') != 'none' and f.get('url'):
-                        q = f.get('height')
-                        quality = f"{q}p" if q else f.get('format_id', 'MP4')
-                        if quality not in seen:
-                            formats.append({
-                                "quality": quality,
-                                "ext": f.get('ext', 'mp4'),
-                                "url": f.get('url')
-                            })
-                            seen.add(quality)
-                formats = formats[-5:][::-1]  # last 5 best
-            else:
-                formats = [{
-                    "quality": "Best",
-                    "ext": data.get('ext', 'mp4'),
-                    "url": data.get('url')
-                }]
+<!-- ADSTERRA SOCIAL BAR - DON'T REMOVE -->
+<script data-cfasync="false" src="https://bellnewyork.org/14/ec5cf818a8aaeaa6ab2ab10d72065ce4"></script>
 
-            add_download()
-
-            return jsonify({
-                "title": data.get('title', 'Video'),
-                "thumbnail": data.get('thumbnail', ''),
-                "formats": formats
-            })
-
-    except Exception as e:
-        return jsonify({"error": f"Cannot download this link: {str(e)}"}), 500
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+</body>
+</html>
