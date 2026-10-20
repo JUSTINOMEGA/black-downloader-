@@ -70,7 +70,7 @@ def get_ydl_opts():
         'extractor_args': {'youtube': {'player_client': ['android','web','ios']}},
     }
 
-HTML = """<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>BLACK Downloader</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}body{background:#050507;color:#fff;min-height:100vh}.navbar{display:flex;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #1a1a1a}.nav-logo{font-weight:800;font-size:22px}.nav-logo span{color:#ff0033}.hero{text-align:center;padding:35px 20px 10px}.badge{background:#161616;border:1px solid #2a2a2a;padding:6px 14px;border-radius:20px;font-size:11px;color:#00ff88;display:inline-block;margin-bottom:14px}.hero h1{font-size:48px;font-weight:800;line-height:0.95}.hero h1 span{color:#ff0033}.main{max-width:700px;margin:0 auto;padding:0 15px}.stats{display:flex;gap:8px;justify-content:center;margin:16px 0}.stat-box{background:#111;border:1px solid #222;padding:12px 18px;border-radius:12px;font-size:11px;text-align:center;min-width:100px}.stat-box b{color:#ff69b4;font-size:19px;display:block}.card{background:#0f0f10;border:1px solid #1e1e1e;border-radius:20px;padding:6px}.inner{background:#161617;border-radius:16px;padding:22px}.input-box{display:flex;gap:8px;position:relative}.input-box input{flex:1;background:#0a0a0a;border:1.5px solid #252525;border-radius:12px;padding:16px 14px 16px 42px;color:#fff;outline:none}.input-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#555}.btn{background:#ff0033;color:#fff;border:none;padding:16px 22px;border-radius:12px;font-weight:700;cursor:pointer}.progress{margin-top:15px;background:#0a0a0a;border-radius:10px;height:8px;overflow:hidden;display:none}.progress-bar{height:100%;background:#ff0033;width:0%;transition:.3s}#status{margin-top:10px;font-size:12px;color:#888}</style></head><body><div class="navbar"><div class="nav-logo">BLACK <span>DOWNLOADER</span></div></div><div class="hero"><div class="badge"><i class="fa-solid fa-circle" style="color:#00ff88;font-size:6px"></i> LIVE</div><h1>DOWNLOAD <br><span>ANYTHING</span></h1></div><div class="main"><div class="stats"><div class="stat-box"><b>{{count}}</b>VISITORS</div><div class="stat-box"><b>100%</b>FAST</div><div class="stat-box"><b>HD</b>QUALITY</div></div><div class="card"><div class="inner"><div class="input-box"><i class="fa-solid fa-link"></i><input id="url" placeholder="Paste YouTube, TikTok, IG link..."><button class="btn" onclick="getInfo()">GO</button></div><div class="progress" id="prog"><div class="progress-bar" id="bar"></div></div><div id="status"></div><div id="result" style="margin-top:15px"></div></div></div></div><script>async function getInfo(){let u=document.getElementById('url').value;if(!u) return alert('Paste link!');document.getElementById('status').innerText='Checking...';document.getElementById('prog').style.display='block';let r=await fetch('/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});let d=await r.json();if(d.error){document.getElementById('status').innerText=d.error;return}document.getElementById('status').innerText=d.title;document.getElementById('result').innerHTML=`<button class="btn" style="width:100%" onclick="download('${u}')">DOWNLOAD NOW <i class="fa-solid fa-download"></i></button>`;}async function download(u){document.getElementById('status').innerText='Downloading...';window.location='/download?url='+encodeURIComponent(u);}setInterval(async()=>{let r=await fetch('/progress');let d=await r.json();document.getElementById('bar').style.width=d.percent+'%';if(d.msg) document.getElementById('status').innerText=d.msg;},800);</script></body></html>"""
+HTML = """<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>BLACK Downloader</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}body{background:#050507;color:#fff;min-height:100vh}.navbar{display:flex;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #1a1a1a}.nav-logo{font-weight:800;font-size:22px}.nav-logo span{color:#ff0033}.hero{text-align:center;padding:35px 20px 10px}.badge{background:#161616;border:1px solid #2a2a2a;padding:6px 14px;border-radius:20px;font-size:11px;color:#00ff88;display:inline-block;margin-bottom:14px}.hero h1{font-size:48px;font-weight:800;line-height:0.95}.hero h1 span{color:#ff0033}.main{max-width:700px;margin:0 auto;padding:0 15px}.stats{display:flex;gap:8px;justify-content:center;margin:16px 0}.stat-box{background:#111;border:1px solid #222;padding:12px 18px;border-radius:12px;font-size:11px;text-align:center;min-width:100px}.stat-box b{color:#ff69b4;font-size:19px;display:block}.card{background:#0f0f10;border:1px solid #1e1e1e;border-radius:20px;padding:6px}.inner{background:#161617;border-radius:16px;padding:22px}.input-box{display:flex;gap:8px;position:relative}.input-box input{flex:1;background:#0a0a0a;border:1.5px solid #252525;border-radius:12px;padding:16px 14px 16px 42px;color:#fff;outline:none}.input-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#555}.btn{background:#ff0033;color:#fff;border:none;padding:16px 22px;border-radius:12px;font-weight:700;cursor:pointer}.progress{margin-top:15px;background:#0a0a0a;border-radius:10px;height:8px;overflow:hidden;display:none}.progress-bar{height:100%;background:#ff0033;width:0%;transition:.3s}#status{margin-top:10px;font-size:12px;color:#888}</style></head><body><div class="navbar"><div class="nav-logo">BLACK <span>DOWNLOADER</span></div></div><div class="hero"><div class="badge"><i class="fa-solid fa-circle" style="color:#00ff88;font-size:6px"></i> LIVE</div><h1>DOWNLOAD <br><span>ANYTHING</span></h1></div><div class="main"><div class="stats"><div class="stat-box"><b>{{count}}</b>VISITORS</div><div class="stat-box"><b>100%</b>FAST</div><div class="stat-box"><b>HD</b>QUALITY</div></div><div class="card"><div class="inner"><div class="input-box"><i class="fa-solid fa-link"></i><input id="url" placeholder="Paste YouTube, TikTok, IG link..."><button class="btn" onclick="getInfo()">GO</button></div><div class="progress" id="prog"><div class="progress-bar" id="bar"></div></div><div id="status"></div><div id="result" style="margin-top:15px"></div></div></div></div><script>async function getInfo(){let u=document.getElementById('url').value;if(!u) return alert('Paste link!');document.getElementById('status').innerText='Checking...';document.getElementById('prog').style.display='block';let r=await fetch('/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});let d=await r.json();if(d.error){document.getElementById('status').innerText=d.error;return}document.getElementById('status').innerText=d.title;document.getElementById('result').innerHTML=`<button class="btn" style="width:100%" onclick="download('${u}')">DOWNLOAD NOW <i class="fa-solid fa-download"></i></button>`;}function download(u){document.getElementById('status').innerText='Downloading via backup...';window.location='/download?url='+encodeURIComponent(u);}setInterval(async()=>{let r=await fetch('/progress');let d=await r.json();document.getElementById('bar').style.width=d.percent+'%';if(d.msg) document.getElementById('status').innerText=d.msg;},800);</script></body></html>"""
 
 @app.route('/')
 def home():
@@ -90,17 +90,14 @@ def info():
         ydl_opts = get_ydl_opts()
         ydl_opts.pop('progress_hooks', None)
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            title = info.get('title','Video')
+            info_data = ydl.extract_info(url, download=False)
+            title = info_data.get('title','Video')
             add_history(title, url)
             return jsonify({"title": title})
     except Exception as e:
-        try:
-            r = requests.post(f"{COBALT_API}/api/json", json={"url": url}, headers={"Accept":"application/json"}, timeout=15)
-            if r.ok:
-                return jsonify({"title": "YouTube Video - Ready to download"})
-        except: pass
-        return jsonify({"error": f"Retrying with backup..."})
+        # FIX: Always return title so user can click download
+        add_history("YouTube Video", url)
+        return jsonify({"title": "Video Ready - Click Download Below"})
 
 @app.route('/download')
 def download():
@@ -118,7 +115,7 @@ def download():
     except Exception as e:
         print(f"yt-dlp failed: {e}, trying cobalt...")
     try:
-        progress_data["msg"] = "Using backup server..."
+        progress_data["msg"] = "Using backup server (no cookies needed)..."
         r = requests.post(f"{COBALT_API}/api/json", json={"url": url, "videoQuality":"720", "filenamePattern":"basic"}, headers={"Accept":"application/json", "Content-Type":"application/json"}, timeout=30)
         data = r.json()
         if data.get('url'):
@@ -131,7 +128,7 @@ def download():
             progress_data = {"percent": 100, "msg": "Done!", "status": "finished"}
             return send_file(tmp_file, as_attachment=True, download_name="black_video.mp4")
         else:
-            return f"Error: {data}", 500
+            return f"Cobalt Error: {data}", 500
     except Exception as e2:
         return f"Both methods failed. Error: {e2}", 500
 
