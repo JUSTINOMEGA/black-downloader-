@@ -2,55 +2,85 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Black Video Downloader</title>
+<title>Black Video Downloader - Fast & Free</title>
 <style>
-body{background:#0b0b0b;color:#fff;font-family:Arial;text-align:center;padding:20px}
-input{width:90%;max-width:500px;padding:14px;border-radius:10px;border:none;font-size:16px}
-button{padding:12px 25px;background:#ff0040;color:#fff;border:none;border-radius:10px;margin-top:10px;font-weight:bold;cursor:pointer}
-.platforms{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
-.p{background:#1c1c1c;padding:12px 18px;border-radius:12px;width:110px;text-align:center;text-decoration:none;color:#fff;display:block}
-.p span{font-size:28px;display:block;margin-bottom:5px}
-#result{margin-top:25px}
-a.down{display:block;background:#222;padding:10px;margin:8px auto;max-width:400px;border-radius:8px;color:#0f0;text-decoration:none}
+body{margin:0;background:#080808;color:#fff;font-family:Arial, sans-serif;text-align:center}
+.header{padding:15px;background:#111;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.live{color:#00ff66;font-weight:bold}
+.live span{width:8px;height:8px;background:#00ff66;display:inline-block;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #00ff66;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.main{padding:30px 15px}
+h1{font-size:28px;margin-bottom:5px}
+.sub{color:#aaa;margin-bottom:20px}
+.box{background:#151515;max-width:600px;margin:20px auto;padding:20px;border-radius:16px;border:1px solid #222}
+input{width:100%;padding:16px;border-radius:12px;border:1px solid #333;background:#0e0e0e;color:#fff;font-size:16px;box-sizing:border-box;outline:none}
+input:focus{border-color:#00ff66}
+button{width:100%;margin-top:12px;padding:15px;background:#00ff66;color:#000;border:none;border-radius:12px;font-weight:bold;font-size:17px;cursor:pointer}
+button:hover{background:#00e65c}
+.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;max-width:600px;margin-left:auto;margin-right:auto}
+.p{background:#1a1a1a;padding:14px 5px;border-radius:12px;font-size:13px;text-decoration:none;color:#fff;border:1px solid #252525;display:block;transition:0.2s}
+.p:hover{background:#222;border-color:#00ff66;transform:translateY(-2px)}
+.p span{font-size:26px;display:block;margin-bottom:4px}
+#result{margin-top:25px;max-width:600px;margin-left:auto;margin-right:auto;text-align:left}
+.vcard{background:#151515;border-radius:14px;padding:15px;border:1px solid #222}
+.vcard img{width:100%;border-radius:10px;margin-bottom:10px}
+a.down{display:block;background:#00ff66;color:#000;padding:12px;text-align:center;border-radius:10px;margin-top:8px;text-decoration:none;font-weight:bold}
+a.down:nth-child(odd){background:#222;color:#00ff66;border:1px solid #333}
 </style>
 </head>
 <body>
 
-<h2>🔥 BLACK VIDEO DOWNLOADER</h2>
-<p id="stats">{{ total }} Downloads | {{ online }} Online</p>
-
-<input id="url" placeholder="Paste video link here...">
-<br>
-<button onclick="getVideo()">DOWNLOAD</button>
-
-<div class="platforms">
-  <a class="p" href="https://facebook.com" target="_blank"><span>📘</span>Facebook</a>
-  <a class="p" href="https://tiktok.com" target="_blank"><span>🎵</span>TikTok</a>
-  <a class="p" href="https://instagram.com" target="_blank"><span>📸</span>Instagram</a>
-  <a class="p" href="https://t.me" target="_blank"><span>✈️</span>Telegram</a>
-  <a class="p" href="https://youtube.com" target="_blank"><span>▶️</span>YouTube</a>
-  <a class="p" href="https://twitter.com" target="_blank"><span>🐦</span>Twitter</a>
+<div class="header">
+  <div>🔥 BLACK DOWNLOADER</div>
+  <div class="live"><span></span>{{ online }} Online</div>
 </div>
 
-<div id="result"></div>
+<div class="main">
+  <h1>All Video Downloader</h1>
+  <div class="sub">{{ total }}+ Videos Downloaded • Fast • Free • No Watermark</div>
+
+  <div class="box">
+    <input id="url" placeholder="Paste Facebook, TikTok, IG, YouTube link here...">
+    <button onclick="getVideo()">DOWNLOAD NOW</button>
+  </div>
+
+  <div class="platforms">
+    <a class="p" href="https://facebook.com" target="_blank"><span>📘</span>Facebook</a>
+    <a class="p" href="https://tiktok.com" target="_blank"><span>🎵</span>TikTok</a>
+    <a class="p" href="https://instagram.com" target="_blank"><span>📸</span>Instagram</a>
+    <a class="p" href="https://t.me" target="_blank"><span>✈️</span>Telegram</a>
+    <a class="p" href="https://youtube.com" target="_blank"><span>▶️</span>YouTube</a>
+    <a class="p" href="https://twitter.com" target="_blank"><span>🐦</span>Twitter</a>
+    <a class="p" href="https://www.moviebox.ph" target="_blank"><span>🎬</span>MovieBox</a>
+    <a class="p" href="https://google.com" target="_blank"><span>🌐</span>Chrome</a>
+  </div>
+
+  <div id="result"></div>
+</div>
 
 <script>
 async function getVideo(){
   let u = document.getElementById('url').value.trim();
-  if(!u){ alert("Paste link first"); return; }
-  document.getElementById('result').innerHTML = "Loading...";
+  if(!u){ alert("Paste link first!"); return; }
+  document.getElementById('result').innerHTML = "<div style='color:#00ff66'>⏳ Getting video info...</div>";
   try{
     let res = await fetch('/info?url=' + encodeURIComponent(u));
     let data = await res.json();
-    if(data.error){ document.getElementById('result').innerHTML = data.error; return; }
-    let html = `<h3>${data.title}</h3>`;
-    if(data.thumbnail) html += `<img src="${data.thumbnail}" style="width:90%;max-width:400px;border-radius:10px"><br>`;
+    if(data.error){
+      document.getElementById('result').innerHTML = `<div style='background:#2a1111;padding:12px;border-radius:10px;color:#ff6b6b'>❌ ${data.error}</div>`;
+      return;
+    }
+    let html = `<div class="vcard">`;
+    if(data.thumbnail) html += `<img src="${data.thumbnail}">`;
+    html += `<div style="font-weight:bold;margin-bottom:10px">${data.title}</div>`;
     data.formats.forEach(f=>{
-      html += `<a class="down" href="${f.url}" target="_blank">Download ${f.quality} - ${f.ext}</a>`;
+      html += `<a class="down" href="${f.url}" target="_blank" download>⬇ Download ${f.quality} (${f.ext.toUpperCase()})</a>`;
     });
+    html += `</div>`;
     document.getElementById('result').innerHTML = html;
+    window.scrollTo(0, document.body.scrollHeight);
   }catch(e){
-    document.getElementById('result').innerHTML = "Error: " + e;
+    document.getElementById('result').innerHTML = "❌ Error: " + e.message;
   }
 }
 </script>
