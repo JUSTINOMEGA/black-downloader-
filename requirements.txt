@@ -1,5 +1,4 @@
-Flask==3.0.0
-flask-cors==4.0.0
-requests
-gunicorn==21.2.0
-yt-dlp[default,curl-cffi]>=2026.08.19
+Flask>=3.0,<4.0
+flask-cors>=4.0
+gunicorn>=22.0
+yt-dlp[default,curl-cffi]>=2026.8.19
