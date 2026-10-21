@@ -2,237 +2,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
-    <title>BLACK DOWNLOADER</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>BLACK DOWNLOADER</title>
+<meta name="description" content="Download supported videos you have permission to save.">
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<!-- Adsterra Popunder -->
+<script data-cfasync="false" src="https://accountut.com/1/87e172de6eacde98194e479419b0040d"></script>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #000;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .box {
-            width: 100%;
-            max-width: 430px;
-            padding: 30px;
-            text-align: center;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 18px;
-            box-shadow: 0 0 30px rgba(254, 44, 85, 0.08);
-        }
-
-        h1 {
-            font-size: 25px;
-            letter-spacing: 1.5px;
-            margin: 0 0 10px;
-        }
-
-        .subtitle {
-            color: #aaa;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            text-align: left;
-            font-size: 13px;
-            color: #ccc;
-            margin: 16px 0 8px;
-        }
-
-        select,
-        input {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            color: #fff;
-            background: #080808;
-            border: 1px solid #333;
-            border-radius: 10px;
-            font-size: 15px;
-        }
-
-        select:focus,
-        input:focus {
-            outline: 2px solid #fe2c55;
-            outline-offset: 1px;
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 18px;
-            background: #fe2c55;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        button:disabled {
-            opacity: 0.55;
-            cursor: wait;
-        }
-
-        #msg {
-            margin-top: 18px;
-            font-size: 14px;
-            line-height: 1.6;
-            overflow-wrap: anywhere;
-        }
-
-        .note {
-            margin-top: 22px;
-            color: #777;
-            font-size: 11px;
-            line-height: 1.6;
-        }
-    </style>
+<style>
+*{box-sizing:border-box}
+:root{--red:#ff263d;--orange:#ff8500;--panel:#111113;--muted:#92929b}
+body{margin:0;background:#080808;color:#fff;font-family:Arial,Helvetica,sans-serif}
+header{height:76px;border-bottom:1px solid #202024;display:flex;align-items:center;justify-content:space-between;padding:0 5%}
+.brand{font-size:21px;font-weight:900}.brand span{color:var(--red)}
+.live{color:#00e98b;font-size:12px;letter-spacing:1px}
+main{width:min(760px,94%);margin:45px auto 35px;text-align:center}
+.pill{display:inline-block;border:1px solid #16472e;background:#092015;color:#00ed91;padding:8px 18px;border-radius:30px;font-size:11px;letter-spacing:1.5px}
+h1{font-size:clamp(29px,5vw,49px);line-height:1.12;margin:25px 0 14px;font-weight:900}
+h1 span{color:var(--red)}h1 em{font-style:normal;color:var(--orange)}
+.subtitle{color:var(--muted);font-size:15px;line-height:1.7}
+.platforms{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:24px 0}
+.platforms span{background:#171719;border:1px solid #29292d;border-radius:25px;padding:9px 15px;font-size:13px;color:#d1d1d5}
+.panel{max-width:640px;margin:30px auto 0;padding:22px;background:var(--panel);border:1px solid #252529;border-radius:22px;text-align:left}
+label{display:block;color:#c9c9cf;font-size:13px;margin:14px 0 8px}
+.inputrow{display:flex;gap:10px}
+input,select{width:100%;min-width:0;padding:16px;color:#fff;background:#080808;border:1px solid #303035;border-radius:12px;font-size:15px}
+input:focus,select:focus{outline:2px solid var(--red)}
+button{border:0;cursor:pointer;font-weight:bold;border-radius:12px}
+.paste{padding:0 19px;background:#202023;color:white;border:1px solid #303035}
+.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:17px}
+.option{background:#1b1b1e;color:#fff;border:1px solid #2a2a30;padding:16px 5px;min-height:72px}
+.option strong{display:block;font-size:13px}
+.option small{display:block;color:var(--muted);font-size:11px;margin-top:9px;font-weight:normal}
+.option.active{border-color:var(--red);background:#241316}
+.download{width:100%;margin-top:16px;padding:17px;background:var(--red);color:white;font-size:16px}
+.download:disabled{opacity:.6;cursor:wait}
+#msg{font-size:13px;line-height:1.6;overflow-wrap:anywhere;margin-top:16px;color:#e8e8e8}
+.ad{max-width:640px;min-height:75px;margin:22px auto;background:#101012;border:1px dashed #36363b;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#777;font-size:12px}
+.ad-label{display:block;font-size:10px;letter-spacing:1px;margin-bottom:6px;color:#666}
+.note{font-size:11px;line-height:1.7;color:#777;text-align:center;margin:22px auto;max-width:600px}
+footer{border-top:1px solid #202024;padding:22px;text-align:center;color:#777;font-size:12px}
+@media(max-width:480px){header{padding:0 4%;height:65px}.brand{font-size:18px}main{margin-top:32px}.panel{padding:15px}.inputrow{flex-wrap:wrap}.paste{padding:13px;width:100%}.options{gap:6px}.option{padding:13px 3px}.option strong{font-size:11px}}
+</style>
 </head>
 
 <body>
-    <main class="box">
-        <h1>BLACK DOWNLOADER</h1>
-        <p class="subtitle">
-            Download supported videos from your favourite platforms.
-        </p>
+<header>
+  <div class="brand">BLACK <span>DOWNLOADER</span></div>
+  <div class="live">● LIVE</div>
+</header>
 
-        <form id="downloadForm">
-            <label for="platform">Choose platform</label>
-            <select id="platform" name="platform">
-                <option value="TikTok">TikTok</option>
-                <option value="Instagram">Instagram</option>
-                <option value="Facebook">Facebook</option>
-                <option value="Telegram">Telegram</option>
-                <option value="MovieBox">MovieBox</option>
-                <option value="Direct">Direct video link</option>
-            </select>
+<main>
+  <div class="pill">● VIDEO DOWNLOADER</div>
+  <h1>DOWNLOAD <span>YOUR VIDEOS</span><br>IN <em>ONE PLACE</em></h1>
+  <p class="subtitle">Paste a supported video link and save content you have permission to download.</p>
 
-            <label for="url">Video link</label>
-            <input
-                id="url"
-                name="url"
-                type="url"
-                placeholder="Paste your video link here"
-                autocomplete="url"
-                required
-            >
+  <div class="platforms">
+    <span>♪ TikTok</span>
+    <span>◎ Instagram</span>
+    <span>f Facebook</span>
+    <span>▶ Telegram</span>
+    <span>▣ MovieBox*</span>
+  </div>
 
-            <button id="btn" type="submit">DOWNLOAD NOW</button>
-        </form>
+  <section class="panel">
+    <form id="downloadForm">
+      <label for="url">PASTE VIDEO LINK</label>
+      <div class="inputrow">
+        <input id="url" name="url" type="url" placeholder="Paste your video link here..." required>
+        <button class="paste" id="pasteBtn" type="button">PASTE</button>
+      </div>
 
-        <div id="msg" role="status" aria-live="polite"></div>
+      <label for="platform">SELECT PLATFORM</label>
+      <select id="platform" name="platform">
+        <option value="TikTok">TikTok</option>
+        <option value="Instagram">Instagram</option>
+        <option value="Facebook">Facebook</option>
+        <option value="Telegram">Telegram</option>
+        <option value="MovieBox">MovieBox</option>
+        <option value="Direct">Direct video link</option>
+      </select>
 
-        <p class="note">
-            Use public links for videos you own or have permission to save.
-            Some platforms and movie pages may not support direct downloads.
-        </p>
-    </main>
+      <div class="options">
+        <button type="button" class="option active" data-mode="best">
+          <strong>BEST QUALITY</strong><small>Best available</small>
+        </button>
+        <button type="button" class="option" data-mode="fast">
+          <strong>FAST</strong><small>Quick download</small>
+        </button>
+        <button type="button" class="option" data-mode="audio">
+          <strong>MP3 AUDIO</strong><small>Audio only</small>
+        </button>
+      </div>
 
-    <script>
-        const form = document.getElementById("downloadForm");
-        const input = document.getElementById("url");
-        const platform = document.getElementById("platform");
-        const button = document.getElementById("btn");
-        const message = document.getElementById("msg");
+      <button class="download" id="btn" type="submit">DOWNLOAD NOW ↓</button>
+    </form>
+    <div id="msg" role="status" aria-live="polite"></div>
+  </section>
 
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
+  <aside class="ad">
+    <div>
+      <span class="ad-label">ADVERTISEMENT</span>
+      Advertisement space
+    </div>
+  </aside>
 
-            const url = input.value.trim();
+  <p class="note">
+    *Not every MovieBox page supports downloading. MP3 conversion requires FFmpeg
+    on the server. Download only content you own or are authorised to save.
+    BLACK DOWNLOADER is not affiliated with the platforms listed above.
+  </p>
+</main>
 
-            if (!url) {
-                message.textContent = "Please paste a video link.";
-                return;
-            }
+<footer>© <span id="year"></span> BLACK DOWNLOADER</footer>
 
-            button.disabled = true;
-            button.textContent = "PLEASE WAIT...";
-            message.textContent = "Checking link and preparing download...";
+<script>
+const form = document.getElementById("downloadForm");
+const input = document.getElementById("url");
+const platform = document.getElementById("platform");
+const button = document.getElementById("btn");
+const message = document.getElementById("msg");
+let mode = "best";
 
-            try {
-                const response = await fetch("/api/download", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        url: url,
-                        platform: platform.value
-                    })
-                });
+document.getElementById("year").textContent = new Date().getFullYear();
 
-                const contentType =
-                    response.headers.get("content-type") || "";
+document.querySelectorAll(".option").forEach(option => {
+  option.addEventListener("click", () => {
+    document.querySelectorAll(".option").forEach(item => item.classList.remove("active"));
+    option.classList.add("active");
+    mode = option.dataset.mode;
+    message.textContent = "";
+  });
+});
 
-                if (!response.ok) {
-                    let errorMessage = "Download failed. Please try again.";
+document.getElementById("pasteBtn").addEventListener("click", async () => {
+  try {
+    input.value = await navigator.clipboard.readText();
+    message.textContent = input.value ? "Link pasted. Ready to download." : "Your clipboard is empty.";
+  } catch {
+    message.textContent = "Clipboard access unavailable. Paste your link into the box manually.";
+    input.focus();
+  }
+});
 
-                    if (contentType.includes("application/json")) {
-                        const data = await response.json();
-                        errorMessage = data.error || errorMessage;
-                    }
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+  const url = input.value.trim();
 
-                    throw new Error(errorMessage);
-                }
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) throw new Error();
+  } catch {
+    message.textContent = "Enter a valid video link beginning with http:// or https://.";
+    return;
+  }
 
-                const blob = await response.blob();
-                const disposition =
-                    response.headers.get("content-disposition") || "";
+  button.disabled = true;
+  button.textContent = "PREPARING DOWNLOAD...";
+  message.textContent = "Checking link and preparing your download. Large files may take a while.";
 
-                const match = disposition.match(
-                    /filename="?([^";]+)"?/i
-                );
+  try {
+    const response = await fetch("/api/download", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({url, platform: platform.value, mode})
+    });
 
-                const filename = match
-                    ? match[1]
-                    : "black-downloader-video.mp4";
+    const type = response.headers.get("content-type") || "";
 
-                const objectUrl = URL.createObjectURL(blob);
-                const link = document.createElement("a");
+    if (!response.ok || type.includes("application/json")) {
+      let detail = "Download failed. Try another supported link.";
+      if (type.includes("application/json")) {
+        const data = await response.json();
+        detail = data.error || detail;
+      } else if (!response.ok) {
+        detail = (await response.text()).slice(0, 250) || detail;
+      }
+      throw new Error(detail);
+    }
 
-                link.href = objectUrl;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
+    const blob = await response.blob();
+    if (!blob.size) throw new Error("The server returned an empty file.");
 
-                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    const disposition = response.headers.get("content-disposition") || "";
+    const match = disposition.match(/filename="?([^";]+)"?/i);
+    const filename = match ? match[1] : (mode === "audio" ? "black-downloader.mp3" : "black-downloader-video.mp4");
 
-                message.textContent =
-                    "Your download is ready. Check your Downloads folder.";
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
 
-            } catch (error) {
-                message.textContent =
-                    "Error: " + (error.message || "Download failed.");
-            } finally {
-                button.disabled = false;
-                button.textContent = "DOWNLOAD NOW";
-            }
-        });
-    </script>
+    message.textContent = "Your download is ready. Check your Downloads folder.";
+  } catch (error) {
+    message.textContent = "Error: " + (error.message || "Download failed.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "DOWNLOAD NOW ↓";
+  }
+});
+</script>
+
+<!-- Adsterra Social Bar -->
+<script data-cfasync="false" src="https://bellnewyork.org/14/ec5cf818a8aaeaa6ab2ab10d72065ce4"></script>
 </body>
 </html>
