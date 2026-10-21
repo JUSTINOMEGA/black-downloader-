@@ -1,13 +1,11 @@
 
 import ipaddress
 import os
-import re
 import shutil
 import socket
 import tempfile
 from urllib.parse import urlparse
 
-import requests
 import yt_dlp
 from flask import Flask, request, jsonify, render_template, send_file
 from flask_cors import CORS
@@ -16,43 +14,28 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 CORS(app)
 
-# Maximum download size: 500 MB
 MAX_FILE_SIZE = 500 * 1024 * 1024
-
-# MovieBox and social platforms may change their supported URLs.
-PLATFORM_HOSTS = {
-    "tiktok.com",
-    "instagram.com",
-    "facebook.com",
-    "fb.watch",
-    "telegram.org",
-    "t.me",
-    "movie-box.com.ng",
-}
 
 VIDEO_EXTENSIONS = {
     ".mp4", ".m4v", ".mov", ".webm", ".mkv"
 }
 
 
-def is_public_host(hostname):
-    """Reject localhost, private IPs, and non-public DNS results."""
-    if not hostname:
-        return False
-
-    if hostname == "localhost" or hostname.endswith(".localhost"):
+def is_public_host(host):
+    if not host or host == "localhost" or host.endswith(".localhost"):
         return False
 
     try:
-        addresses = [ipaddress.ip_address(hostname)]
+        addresses = [ipaddress.ip_address(host)]
     except ValueError:
         try:
-            addresses = [
-                ipaddress.ip_address(result[4][0])
-                for result in socket.getaddrinfo(
-                    hostname, None, type=socket.SOCK_STREAM
-                )
-            ]
+            results = socket.getaddrinfo(
+                host, None, type=socket.SOCK_STREAM
+            )
+            addresses = list({
+                ipaddress.ip_address(item[4][0])
+                for item in results
+            })
         except (OSError, ValueError):
             return False
 
@@ -62,31 +45,41 @@ def is_public_host(hostname):
 
 
 def validate_url(url):
-    parsed = urlparse(url)
+    try:
+        parsed = urlparse(url)
 
-    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        if parsed.scheme not in ("http", "https"):
+            return False
+
+        if not parsed.hostname or parsed.username or parsed.password:
+            return False
+
+        if not is_public_host(parsed.hostname):
+            return False
+
+        return True
+    except (ValueError, TypeError):
         return False
-
-    if parsed.username or parsed.password:
-        return False
-
-    return is_public_host(parsed.hostname)
 
 
 def detect_platform(url):
     host = (urlparse(url).hostname or "").lower()
     host = host.removeprefix("www.")
 
-    if host == "vm.tiktok.com" or host.endswith(".tiktok.com") or host == "tiktok.com":
+    if host == "tiktok.com" or host.endswith(".tiktok.com"):
         return "TikTok"
 
     if host == "instagram.com" or host.endswith(".instagram.com"):
         return "Instagram"
 
-    if host == "facebook.com" or host.endswith(".facebook.com") or host == "fb.watch":
+    if (
+        host == "facebook.com"
+        or host.endswith(".facebook.com")
+        or host == "fb.watch"
+    ):
         return "Facebook"
 
-    if host == "t.me" or host.endswith(".telegram.org") or host == "telegram.org":
+    if host == "t.me" or host == "telegram.org" or host.endswith(".telegram.org"):
         return "Telegram"
 
     if host == "movie-box.com.ng" or host.endswith(".movie-box.com.ng"):
@@ -100,61 +93,82 @@ def home():
     return render_template("index.html")
 
 
+@app.route("/health")
+def health():
+    return jsonify({
+        "status": "ok",
+        "yt_dlp_version": yt_dlp.version.__version__
+    })
+
+
 @app.route("/api/download", methods=["GET", "POST"])
 def download_api():
     if request.method == "POST":
-        video_url = (request.get_json(silent=True) or {}).get("url", "").strip()
+        data = request.get_json(silent=True) or {}
+        video_url = str(data.get("url", "")).strip()
     else:
         video_url = request.args.get("url", "").strip()
 
     if not video_url:
-        return jsonify({"error": "Please paste a video link."}), 400
+        return jsonify({
+            "error": "Please paste a video link."
+        }), 400
 
     if len(video_url) > 4096 or not validate_url(video_url):
-        return jsonify({"error": "Invalid or unsupported URL."}), 400
+        return jsonify({
+            "error": "Invalid or inaccessible URL. Please check the link."
+        }), 400
 
     platform = detect_platform(video_url)
-
     parsed = urlparse(video_url)
-    path = parsed.path.lower()
+
     is_direct_video = any(
-        path.endswith(ext) for ext in VIDEO_EXTENSIONS
+        parsed.path.lower().endswith(ext)
+        for ext in VIDEO_EXTENSIONS
     )
 
-    # Accept direct video URLs only for known public platform domains
-    # or publicly hosted video files. Do not allow arbitrary local URLs.
     if not platform and not is_direct_video:
         return jsonify({
             "error": (
-                "This link is not from a supported platform. "
-                "Use TikTok, Instagram, Facebook, Telegram, or MovieBox."
+                "Unsupported link. Use TikTok, Instagram, Facebook, "
+                "Telegram, MovieBox, or a direct video URL."
             )
         }), 400
 
     temp_dir = tempfile.mkdtemp(prefix="black_downloader_")
 
     try:
-        output_template = os.path.join(temp_dir, "%(title).100B.%(ext)s")
+        output_template = os.path.join(
+            temp_dir, "%(title).100B.%(ext)s"
+        )
 
         options = {
             "outtmpl": output_template,
             "format": "best[ext=mp4]/best",
             "noplaylist": True,
             "max_filesize": MAX_FILE_SIZE,
-            "max_downloads": 1,
-            "socket_timeout": 25,
+            "socket_timeout": 30,
             "retries": 2,
             "quiet": True,
             "no_warnings": True,
             "restrictfilenames": True,
             "windowsfilenames": True,
-            "ignoreerrors": False,
+            "http_headers": {
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/140.0.0.0 Safari/537.36"
+                )
+            },
         }
 
-        # yt-dlp may not support every Telegram post or MovieBox page.
-        # Private/restricted content is not bypassed.
         with yt_dlp.YoutubeDL(options) as downloader:
-            downloader.download([video_url])
+            info = downloader.extract_info(
+                video_url, download=True
+            )
+
+        if not info:
+            raise RuntimeError("No video information was returned.")
 
         files = [
             os.path.join(temp_dir, name)
@@ -164,52 +178,55 @@ def download_api():
 
         if not files:
             raise RuntimeError(
-                "No video file was downloaded. The link may be unsupported."
+                "The source did not produce a downloadable video file."
             )
 
         file_path = max(files, key=os.path.getsize)
+        file_size = os.path.getsize(file_path)
 
-        if os.path.getsize(file_path) > MAX_FILE_SIZE:
-            raise RuntimeError("The video exceeds the 500 MB download limit.")
+        if file_size == 0:
+            raise RuntimeError("The downloaded file is empty.")
+
+        if file_size > MAX_FILE_SIZE:
+            raise RuntimeError("The video exceeds the 500 MB limit.")
 
         original_name = os.path.basename(file_path)
         name_without_ext = os.path.splitext(original_name)[0]
-        safe_name = secure_filename(name_without_ext) or "video"
         ext = os.path.splitext(original_name)[1].lower()
 
         if ext not in VIDEO_EXTENSIONS:
             ext = ".mp4"
 
+        safe_name = secure_filename(name_without_ext) or "video"
+
         response = send_file(
             file_path,
             as_attachment=True,
             download_name=f"{safe_name}{ext}",
-            conditional=True,
+            conditional=True
         )
 
         response.call_on_close(
             lambda: shutil.rmtree(temp_dir, ignore_errors=True)
         )
+
         return response
 
     except Exception:
         app.logger.exception(
-            "Download failed for platform %s", platform or "direct video"
+            "Download failed for platform %s",
+            platform or "direct video"
         )
+
         shutil.rmtree(temp_dir, ignore_errors=True)
 
         return jsonify({
             "error": (
-                "Download failed. This source may be unsupported, "
-                "unavailable, private, or restricted. Try another "
+                "Download failed. The link may be private, unsupported, "
+                "restricted, or blocked by the source. Try another "
                 "public video link."
             )
         }), 502
-
-
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok"})
 
 
 if __name__ == "__main__":
