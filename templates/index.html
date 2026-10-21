@@ -1,34 +1,238 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Black Downloader</title>
-<style>body{font-family:Arial;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px}.box{background:#111;padding:30px;border-radius:15px;width:100%;max-width:400px;text-align:center;border:1px solid #333}input{width:100%;padding:15px;border-radius:10px;border:none;margin:15px 0;box-sizing:border-box}button{width:100%;padding:15px;background:#fe2c55;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer}#msg{margin-top:15px;font-size:14px}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>BLACK DOWNLOADER</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 430px;
+            padding: 30px;
+            text-align: center;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 18px;
+            box-shadow: 0 0 30px rgba(254, 44, 85, 0.08);
+        }
+
+        h1 {
+            font-size: 25px;
+            letter-spacing: 1.5px;
+            margin: 0 0 10px;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            color: #ccc;
+            margin: 16px 0 8px;
+        }
+
+        select,
+        input {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            color: #fff;
+            background: #080808;
+            border: 1px solid #333;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        select:focus,
+        input:focus {
+            outline: 2px solid #fe2c55;
+            outline-offset: 1px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 18px;
+            background: #fe2c55;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: wait;
+        }
+
+        #msg {
+            margin-top: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .note {
+            margin-top: 22px;
+            color: #777;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+    </style>
 </head>
+
 <body>
-<div class="box">
-<h2>BLACK DOWNLOADER</h2>
-<input id="url" placeholder="Paste TikTok link here">
-<button id="btn" onclick="downloadNow()">DOWNLOAD NOW</button>
-<div id="msg"></div>
-</div>
-<script>
-async function downloadNow(){
-  const u = document.getElementById('url').value.trim();
-  const b = document.getElementById('btn');
-  const m = document.getElementById('msg');
-  if(!u){m.innerHTML="❌ Paste link";return;}
-  b.disabled=true; b.innerText="Getting..."; m.innerHTML="⏳ Wait...";
-  try{
-    const res = await fetch(`/api/download?url=${encodeURIComponent(u)}`);
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error);
-    m.innerHTML="✅ Downloading... Check gallery!";
-    // Use proxy - this will FORCE download to system
-    window.location.href = data.proxyUrl;
-  }catch(e){ m.innerHTML="❌ "+e.message; }
-  finally{ b.disabled=false; b.innerText="DOWNLOAD NOW"; }
-}
-</script>
+    <main class="box">
+        <h1>BLACK DOWNLOADER</h1>
+        <p class="subtitle">
+            Download supported videos from your favourite platforms.
+        </p>
+
+        <form id="downloadForm">
+            <label for="platform">Choose platform</label>
+            <select id="platform" name="platform">
+                <option value="TikTok">TikTok</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Telegram">Telegram</option>
+                <option value="MovieBox">MovieBox</option>
+                <option value="Direct">Direct video link</option>
+            </select>
+
+            <label for="url">Video link</label>
+            <input
+                id="url"
+                name="url"
+                type="url"
+                placeholder="Paste your video link here"
+                autocomplete="url"
+                required
+            >
+
+            <button id="btn" type="submit">DOWNLOAD NOW</button>
+        </form>
+
+        <div id="msg" role="status" aria-live="polite"></div>
+
+        <p class="note">
+            Use public links for videos you own or have permission to save.
+            Some platforms and movie pages may not support direct downloads.
+        </p>
+    </main>
+
+    <script>
+        const form = document.getElementById("downloadForm");
+        const input = document.getElementById("url");
+        const platform = document.getElementById("platform");
+        const button = document.getElementById("btn");
+        const message = document.getElementById("msg");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const url = input.value.trim();
+
+            if (!url) {
+                message.textContent = "Please paste a video link.";
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "PLEASE WAIT...";
+            message.textContent = "Checking link and preparing download...";
+
+            try {
+                const response = await fetch("/api/download", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        platform: platform.value
+                    })
+                });
+
+                const contentType =
+                    response.headers.get("content-type") || "";
+
+                if (!response.ok) {
+                    let errorMessage = "Download failed. Please try again.";
+
+                    if (contentType.includes("application/json")) {
+                        const data = await response.json();
+                        errorMessage = data.error || errorMessage;
+                    }
+
+                    throw new Error(errorMessage);
+                }
+
+                const blob = await response.blob();
+                const disposition =
+                    response.headers.get("content-disposition") || "";
+
+                const match = disposition.match(
+                    /filename="?([^";]+)"?/i
+                );
+
+                const filename = match
+                    ? match[1]
+                    : "black-downloader-video.mp4";
+
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+
+                link.href = objectUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+
+                message.textContent =
+                    "Your download is ready. Check your Downloads folder.";
+
+            } catch (error) {
+                message.textContent =
+                    "Error: " + (error.message || "Download failed.");
+            } finally {
+                button.disabled = false;
+                button.textContent = "DOWNLOAD NOW";
+            }
+        });
+    </script>
 </body>
 </html>
