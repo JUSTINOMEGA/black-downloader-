@@ -1,68 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Black Downloader - TikTok Downloader</title>
-<style>
-body{font-family:Arial,sans-serif;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px}
-.box{background:#111;padding:30px;border-radius:15px;width:100%;max-width:400px;text-align:center;border:1px solid #333}
-input{width:100%;padding:15px;border-radius:10px;border:none;margin:15px 0;box-sizing:border-box}
-button{width:100%;padding:15px;background:#fe2c55;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer}
-button:disabled{background:#555}
-#msg{margin-top:15px;font-size:14px;min-height:20px}
-</style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Downloader</title>
+<style>body{font-family:Arial;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px}.box{background:#111;padding:30px;border-radius:15px;width:100%;max-width:400px;text-align:center;border:1px solid #333}input{width:100%;padding:15px;border-radius:10px;border:none;margin:15px 0;box-sizing:border-box}button{width:100%;padding:15px;background:#fe2c55;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer}#msg{margin-top:15px;font-size:14px}</style>
 </head>
 <body>
 <div class="box">
 <h2>BLACK DOWNLOADER</h2>
-<p>Paste TikTok Link</p>
-<input type="text" id="url" placeholder="https://www.tiktok.com/@...">
+<input id="url" placeholder="Paste TikTok link here">
 <button id="btn" onclick="downloadNow()">DOWNLOAD NOW</button>
 <div id="msg"></div>
 </div>
-
 <script>
 async function downloadNow(){
-  const urlInput = document.getElementById('url').value.trim();
-  const btn = document.getElementById('btn');
-  const msg = document.getElementById('msg');
-  
-  if(!urlInput){
-    msg.innerHTML = "❌ Paste link first";
-    return;
-  }
-  
-  btn.disabled = true;
-  btn.innerText = "Processing...";
-  msg.innerHTML = "⏳ Getting video...";
-  
+  const u = document.getElementById('url').value.trim();
+  const b = document.getElementById('btn');
+  const m = document.getElementById('msg');
+  if(!u){m.innerHTML="❌ Paste link";return;}
+  b.disabled=true; b.innerText="Getting..."; m.innerHTML="⏳ Wait...";
   try{
-    const res = await fetch(`/api/download?url=${encodeURIComponent(urlInput)}`);
+    const res = await fetch(`/api/download?url=${encodeURIComponent(u)}`);
     const data = await res.json();
-    
-    if(!res.ok) throw new Error(data.error || "Failed");
-    
-    msg.innerHTML = "✅ Starting download...";
-    
-    // Trigger download
-    const a = document.createElement('a');
-    a.href = data.downloadUrl;
-    a.download = (data.title || 'video') + '.mp4';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    msg.innerHTML = "✅ Done! Check your gallery";
-    
-  }catch(e){
-    console.log(e);
-    msg.innerHTML = "❌ Error. Try again. " + e.message;
-  }finally{
-    btn.disabled = false;
-    btn.innerText = "DOWNLOAD NOW";
-  }
+    if(!res.ok) throw new Error(data.error);
+    m.innerHTML="✅ Downloading... Check gallery!";
+    // Use proxy - this will FORCE download to system
+    window.location.href = data.proxyUrl;
+  }catch(e){ m.innerHTML="❌ "+e.message; }
+  finally{ b.disabled=false; b.innerText="DOWNLOAD NOW"; }
 }
 </script>
 </body>
