@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS
-import yt_dlp
+import requests
 import os
 
 app = Flask(__name__)
@@ -15,31 +15,28 @@ def download_api():
     video_url = request.args.get('url')
     if not video_url:
         return jsonify({"error": "No URL"}), 400
-    
-    ydl_opts = {
-        'format': 'best',
-        'quiet': True,
-        'no_warnings': True,
-        'noplaylist': True,
-    }
-    
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=False)
-            if 'url' in info and info['url']:
-                direct_url = info['url']
-            elif 'formats' in info and len(info['formats']) > 0:
-                direct_url = info['formats'][-1]['url']
-            else:
-                return jsonify({"error": "No video found"}), 500
-                
-            return jsonify({
-                "downloadUrl": direct_url,
-                "title": info.get('title', 'video')
-            })
+        api_url = f"https://www.tikwm.com/api/?url={video_url}&count=12&cursor=0&web=1&hd=1"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        res = requests.get(api_url, headers=headers, timeout=15)
+        data = res.json()
+        if data.get("code") == 0 and "data" in data:
+            direct_url = data["data"].get("hdplay") or data["data"].get("play")
+            title = data["data"].get("title", "video")
+            return jsonify({"downloadUrl": direct_url, "title": title, "proxyUrl": f"/api/file?url={direct_url}&title={title}"})
+        return jsonify({"error": "Failed"}), 500
     except Exception as e:
-        print(f"ERROR: {e}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/file')
+def proxy_file():
+    file_url = request.args.get('url')
+    title = request.args.get('title', 'video')
+    headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://www.tikwm.com/"}
+    r = requests.get(file_url, headers=headers, stream=True, timeout=30)
+    return Response(r.iter_content(chunk_size=8192),
+                    content_type='video/mp4',
+                    headers={"Content-Disposition": f"attachment; filename={title}.mp4"})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
