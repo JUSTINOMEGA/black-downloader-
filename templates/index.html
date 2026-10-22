@@ -4,227 +4,398 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Black Video Downloader helps you download videos from supported platforms when downloading is permitted.">
-    <title>Black Video Downloader</title>
+    <meta name="description" content="Black Downloader helps you download videos from supported platforms when permitted.">
+    <meta name="theme-color" content="#080808">
+    <title>BLACK DOWNLOADER</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background: #0b0b0b;
+            background: #080808;
             color: #fff;
-            display: flex;
-            flex-direction: column;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         header {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 38px;
+            border-bottom: 1px solid #1b1b1b;
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .brand span { color: #ff2938; }
+
+        .live {
+            color: #00ff91;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        .live::before {
+            content: "●";
+            margin-right: 7px;
+        }
+
+        .live-bar {
+            margin: 53px 10px 0;
+            padding: 7px 10px;
             text-align: center;
-            padding: 24px 16px;
-            border-bottom: 1px solid #292929;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: clamp(24px, 5vw, 34px);
-        }
-
-        header span {
-            color: #00d084;
+            background: #092015;
+            border: 1px solid #10482b;
+            border-radius: 30px;
+            color: #00ff91;
+            font-size: 11px;
+            letter-spacing: 1.4px;
         }
 
         main {
-            width: min(92%, 650px);
-            margin: auto;
-            padding: 45px 0;
+            width: min(94%, 630px);
+            margin: 29px auto 55px;
             text-align: center;
         }
 
-        .panel {
-            background: #171717;
-            border: 1px solid #303030;
-            border-radius: 18px;
-            padding: 28px 22px;
-            box-shadow: 0 12px 40px #0005;
+        h1 {
+            margin: 0 0 14px;
+            font-size: clamp(27px, 5vw, 43px);
+            line-height: 1.2;
+            font-weight: 900;
         }
 
-        h2 {
-            margin-top: 0;
-        }
+        .red { color: #ff2938; }
+        .orange { color: #ff8500; }
 
-        .description {
-            color: #bbb;
+        .subtitle {
+            margin: 0 auto 23px;
+            color: #777;
+            font-size: 16px;
             line-height: 1.6;
         }
 
-        form {
-            margin-top: 26px;
+        .platforms {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .platform {
+            padding: 8px 15px;
+            border: 1px solid #292929;
+            border-radius: 22px;
+            background: #151515;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            width: 120px;
+            padding: 13px 8px;
+            background: #121212;
+            border: 1px solid #242424;
+            border-radius: 16px;
+        }
+
+        .stat strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff347c;
+            font-size: 20px;
+        }
+
+        .stat span {
+            color: #777;
+            font-size: 12px;
+        }
+
+        .panel {
+            padding: 21px;
+            background: #111;
+            border: 1px solid #252525;
+            border-radius: 23px;
+            text-align: left;
+        }
+
+        .url-row {
+            display: flex;
+            gap: 12px;
         }
 
         input {
-            width: 100%;
-            padding: 16px;
-            border: 1px solid #444;
-            border-radius: 10px;
-            background: #0b0b0b;
+            flex: 1;
+            min-width: 0;
+            padding: 18px;
+            background: #090909;
             color: #fff;
-            font-size: 16px;
+            border: 1px solid #292929;
+            border-radius: 13px;
             outline: none;
+            font-size: 16px;
         }
 
-        input:focus {
-            border-color: #00d084;
-        }
+        input:focus { border-color: #ff2938; }
 
         button {
-            width: 100%;
-            margin-top: 14px;
-            padding: 15px;
-            background: #00d084;
-            color: #07130e;
-            font-weight: bold;
-            font-size: 16px;
-            border: none;
-            border-radius: 10px;
+            border: 1px solid #303030;
+            background: #191919;
+            color: #fff;
+            border-radius: 13px;
+            padding: 14px 20px;
             cursor: pointer;
+            font-weight: bold;
         }
 
-        button:hover {
-            background: #00b875;
+        button:hover { border-color: #ff2938; }
+        button:disabled { opacity: .6; cursor: wait; }
+
+        .paste-button {
+            color: #ccc;
+            font-weight: normal;
         }
 
-        button:disabled {
-            opacity: .6;
-            cursor: wait;
+        .modes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 17px;
+        }
+
+        .mode {
+            min-height: 75px;
+            padding: 12px 5px;
+            text-align: center;
+        }
+
+        .mode.active { border-color: #ff2938; }
+
+        .mode strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .mode small {
+            color: #777;
+            font-size: 11px;
+            font-weight: normal;
         }
 
         #status {
             margin-top: 18px;
+            color: #00ff91;
             line-height: 1.5;
             overflow-wrap: anywhere;
+            text-align: center;
         }
 
-        .supported {
-            margin-top: 24px;
-            color: #aaa;
-            font-size: 14px;
-            line-height: 1.8;
+        .note {
+            margin-top: 17px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: center;
         }
 
         footer {
+            padding: 24px 12px;
+            color: #777;
             text-align: center;
-            color: #888;
-            padding: 22px 12px;
-            font-size: 13px;
-            border-top: 1px solid #292929;
+            border-top: 1px solid #222;
+            font-size: 12px;
         }
 
-        footer a {
-            color: #00d084;
+        @media (max-width: 480px) {
+            header { padding: 0 17px; }
+            .live-bar { margin-top: 30px; letter-spacing: .7px; }
+            main { margin-top: 28px; }
+            .panel { padding: 14px; }
+            .url-row { flex-direction: column; }
+            .paste-button { min-height: 45px; }
+            .modes { gap: 7px; }
+            .mode { padding: 10px 2px; }
+            .stat { width: 105px; }
         }
     </style>
 </head>
 
 <body>
     <header>
-        <h1>Black <span>Video Downloader</span></h1>
+        <div class="brand">BLACK <span>DOWNLOADER</span></div>
+        <div class="live">LIVE</div>
     </header>
 
+    <div class="live-bar">
+        ● LIVE - VISITORS ONLINE - SECURE
+    </div>
+
     <main>
+        <h1>
+            DOWNLOAD <span class="red">ANYTHING</span>
+            <span class="orange">IN 2 SECONDS</span>
+        </h1>
+
+        <p class="subtitle">
+            Paste any supported TikTok, Instagram or Facebook link.
+            Downloads depend on platform availability.
+        </p>
+
+        <div class="platforms">
+            <span class="platform">♪ TikTok</span>
+            <span class="platform">◎ Instagram</span>
+            <span class="platform">● Facebook</span>
+            <span class="platform">♥ Telegram</span>
+            <span class="platform">▶ MovieBox</span>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <strong>—</strong>
+                <span>Total Users</span>
+            </div>
+            <div class="stat">
+                <strong>—</strong>
+                <span>Downloads Today</span>
+            </div>
+            <div class="stat">
+                <strong>—</strong>
+                <span>Rating</span>
+            </div>
+        </div>
+
         <section class="panel">
-            <h2>Download your video</h2>
-
-            <p class="description">
-                Paste a video link below to check whether it can be downloaded.
-            </p>
-
             <form id="download-form">
-                <input
-                    id="video-url"
-                    type="url"
-                    placeholder="Paste your video link here..."
-                    aria-label="Video URL"
-                    autocomplete="url"
-                    required
-                >
+                <div class="url-row">
+                    <input
+                        id="video-url"
+                        type="url"
+                        placeholder="Paste video link here..."
+                        aria-label="Video URL"
+                        autocomplete="url"
+                        required
+                    >
+                    <button class="paste-button" id="paste-button" type="button">
+                        PASTE
+                    </button>
+                </div>
 
-                <button id="download-button" type="submit">
-                    Download Video
+                <div class="modes">
+                    <button class="mode active" type="button" data-mode="best">
+                        <strong>BEST QUALITY</strong>
+                        <small>Full HD</small>
+                    </button>
+                    <button class="mode" type="button" data-mode="fast">
+                        <strong>FAST</strong>
+                        <small>Quick Save</small>
+                    </button>
+                    <button class="mode" type="button" data-mode="mp3">
+                        <strong>MP3 AUDIO</strong>
+                        <small>Audio Only</small>
+                    </button>
+                </div>
+
+                <button id="download-button" type="submit"
+                    style="width:100%; margin-top:16px; background:#ff2938; border-color:#ff2938;">
+                    DOWNLOAD NOW
                 </button>
             </form>
 
             <div id="status" role="status" aria-live="polite"></div>
 
-            <div class="supported">
-                Supported platforms may include YouTube, TikTok,
-                Instagram, Facebook, X, Vimeo and other supported URLs.
-                <br>
-                Availability depends on the platform and video.
+            <div class="note">
+                Download only videos you own or are authorized to save.
+                Respect copyright and platform terms.
             </div>
         </section>
     </main>
 
     <footer>
-        Download only videos you own or are authorized to save.
-        Respect copyright and each platform's terms.
+        © BLACK DOWNLOADER · Download responsibly
     </footer>
 
     <script>
         const form = document.getElementById("download-form");
         const urlInput = document.getElementById("video-url");
-        const button = document.getElementById("download-button");
+        const downloadButton = document.getElementById("download-button");
+        const pasteButton = document.getElementById("paste-button");
         const statusBox = document.getElementById("status");
 
-        form.addEventListener("submit", async function (event) {
+        let selectedMode = "best";
+
+        document.querySelectorAll(".mode").forEach(button => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".mode").forEach(item =>
+                    item.classList.remove("active")
+                );
+                button.classList.add("active");
+                selectedMode = button.dataset.mode;
+            });
+        });
+
+        pasteButton.addEventListener("click", async () => {
+            try {
+                urlInput.value = await navigator.clipboard.readText();
+                statusBox.textContent = "Link pasted. Ready to download.";
+            } catch (_) {
+                statusBox.textContent =
+                    "Clipboard access is unavailable. Paste your link into the box.";
+                urlInput.focus();
+            }
+        });
+
+        form.addEventListener("submit", async event => {
             event.preventDefault();
 
             const url = urlInput.value.trim();
-
             if (!url) {
                 statusBox.textContent = "Please paste a video link.";
                 return;
             }
 
-            button.disabled = true;
-            button.textContent = "Processing...";
-            statusBox.textContent = "Checking the link and preparing your video...";
+            downloadButton.disabled = true;
+            downloadButton.textContent = "PROCESSING...";
+            statusBox.textContent = "Preparing your download...";
 
             try {
                 const response = await fetch("/api/download", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ url })
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url, mode: selectedMode })
                 });
 
-                const contentType =
-                    response.headers.get("content-type") || "";
+                const contentType = response.headers.get("content-type") || "";
 
                 if (!response.ok || contentType.includes("application/json")) {
-                    let message = "Download failed. Please try again.";
-
+                    let message = "Download failed. Please try another link.";
                     try {
                         const result = await response.json();
                         message = result.error || message;
                     } catch (_) {}
-
                     throw new Error(message);
                 }
 
                 const blob = await response.blob();
                 const disposition =
                     response.headers.get("content-disposition") || "";
-
                 const match = disposition.match(/filename="?([^";]+)"?/i);
-                const filename = match
-                    ? match[1]
-                    : "downloaded-video.mp4";
-
+                const filename = match ? match[1] : "downloaded-video.mp4";
                 const objectUrl = URL.createObjectURL(blob);
                 const link = document.createElement("a");
 
@@ -233,19 +404,20 @@
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
-
                 setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
 
                 statusBox.textContent =
-                    "Your video is ready. Check your browser's downloads.";
+                    "Download started. Check your browser downloads.";
             } catch (error) {
                 statusBox.textContent =
                     error.message || "An unexpected error occurred.";
             } finally {
-                button.disabled = false;
-                button.textContent = "Download Video";
+                downloadButton.disabled = false;
+                downloadButton.textContent = "DOWNLOAD NOW";
             }
         });
     </script>
+
+    <!-- PASTE YOUR EXACT ADSTERRA SOCIAL BAR SCRIPT HERE, BEFORE </body> -->
 </body>
 </html>
