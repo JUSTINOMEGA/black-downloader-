@@ -1,4 +1,5 @@
 
 Flask
 gunicorn
-yt-dlp>=2026.8.19
+yt-dlp>=2026.08.19
+curl_cffi
