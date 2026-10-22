@@ -1,312 +1,308 @@
 
 import os
 import re
-import time
-import uuid
 import shutil
-import socket
-import sqlite3
 import tempfile
+import threading
 import ipaddress
-import logging
-from pathlib import Path
-from urllib.parse import urlparse
+import socket
+from urllib.parse import urlparse, unquote
 
-import yt_dlp
-from flask import Flask, jsonify, render_template, request, send_file
-from flask_cors import CORS
-from werkzeug.utils import secure_filename
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    send_file,
+    after_this_request,
+)
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
 
 app = Flask(__name__)
-CORS(app)
 
-logging.basicConfig(level=logging.INFO)
-app.logger.setLevel(logging.INFO)
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+app.config["JSON_SORT_KEYS"] = False
 
-MAX_FILE_SIZE = 500 * 1024 * 1024
-LIVE_DB = os.path.join(tempfile.gettempdir(), "black_downloader_live.db")
-LIVE_WINDOW = 45
+DOWNLOADS_DIR = os.path.join(tempfile.gettempdir(), "black_video_downloads")
+os.makedirs(DOWNLOADS_DIR, exist_ok=True)
+
+# Prevent excessive simultaneous downloads on a small hosting instance.
+download_slots = threading.BoundedSemaphore(2)
+
+SUPPORTED_HOSTS = (
+    "youtube.com",
+    "youtu.be",
+    "youtube-nocookie.com",
+    "tiktok.com",
+    "instagram.com",
+    "facebook.com",
+    "fb.watch",
+    "twitter.com",
+    "x.com",
+    "vimeo.com",
+    "dailymotion.com",
+    "reddit.com",
+    "twitch.tv",
+    "streamable.com",
+    "pinterest.com",
+    "soundcloud.com",
+)
 
 VIDEO_EXTENSIONS = {
-    ".mp4", ".m4v", ".mov", ".webm", ".mkv"
+    ".mp4", ".m4v", ".mov", ".webm", ".mkv", ".avi"
 }
 
 
-# ---------- Live visitor database ----------
+def is_allowed_public_host(host):
+    """Reject localhost and IP literals that are not public addresses."""
+    if not host:
+        return False
 
-def init_live_db():
-    with sqlite3.connect(LIVE_DB, timeout=10) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS visitors (
-                visitor_id TEXT PRIMARY KEY,
-                last_seen REAL NOT NULL
-            )
-        """)
+    host = host.lower().rstrip(".")
 
-
-init_live_db()
-
-
-@app.route("/api/heartbeat", methods=["POST"])
-def live_heartbeat():
-    data = request.get_json(silent=True) or {}
-    raw_id = data.get("visitor_id", "")
-
-    try:
-        visitor_id = str(uuid.UUID(str(raw_id)))
-    except (ValueError, TypeError, AttributeError):
-        return jsonify({"error": "Invalid visitor ID"}), 400
-
-    now = time.time()
-
-    try:
-        with sqlite3.connect(LIVE_DB, timeout=10) as conn:
-            conn.execute("""
-                INSERT INTO visitors (visitor_id, last_seen)
-                VALUES (?, ?)
-                ON CONFLICT(visitor_id)
-                DO UPDATE SET last_seen = excluded.last_seen
-            """, (visitor_id, now))
-
-            conn.execute(
-                "DELETE FROM visitors WHERE last_seen < ?",
-                (now - 120,)
-            )
-
-            count = conn.execute(
-                "SELECT COUNT(*) FROM visitors WHERE last_seen >= ?",
-                (now - LIVE_WINDOW,)
-            ).fetchone()[0]
-
-        return jsonify({"active_users": count})
-
-    except sqlite3.Error:
-        app.logger.exception("Live visitor tracking failed")
-        return jsonify({"active_users": None}), 503
-
-
-@app.route("/api/live-users", methods=["GET"])
-def live_users():
-    try:
-        cutoff = time.time() - LIVE_WINDOW
-
-        with sqlite3.connect(LIVE_DB, timeout=10) as conn:
-            count = conn.execute(
-                "SELECT COUNT(*) FROM visitors WHERE last_seen >= ?",
-                (cutoff,)
-            ).fetchone()[0]
-
-        return jsonify({"active_users": count})
-
-    except sqlite3.Error:
-        app.logger.exception("Could not count visitors")
-        return jsonify({"active_users": None}), 503
-
-
-# ---------- URL validation ----------
-
-def validate_url(value):
-    if not isinstance(value, str) or len(value) > 4096:
+    if host == "localhost" or host.endswith(".localhost"):
         return False
 
     try:
-        parsed = urlparse(value.strip())
+        ip = ipaddress.ip_address(host)
+        return ip.is_global
+    except ValueError:
+        pass
 
-        if parsed.scheme not in ("http", "https"):
-            return False
-
-        if not parsed.hostname or parsed.username or parsed.password:
-            return False
-
-        host = parsed.hostname.lower()
-
-        if host in ("localhost", "localhost.localdomain"):
-            return False
-
-        # Reject private, loopback and reserved IP addresses.
-        try:
-            ip = ipaddress.ip_address(host)
-            return ip.is_global
-        except ValueError:
-            pass
-
-        # Reject domains that resolve to non-public IP addresses.
+    try:
         addresses = socket.getaddrinfo(
-            host, parsed.port or (443 if parsed.scheme == "https" else 80),
-            type=socket.SOCK_STREAM
+            host, None, type=socket.SOCK_STREAM
         )
-
-        if not addresses:
-            return False
-
-        for address in addresses:
-            ip = ipaddress.ip_address(address[4][0])
-            if not ip.is_global:
-                return False
-
-        return True
-
-    except (ValueError, OSError, socket.gaierror):
+        return bool(addresses) and all(
+            ipaddress.ip_address(item[4][0]).is_global
+            for item in addresses
+        )
+    except (OSError, ValueError):
         return False
 
 
 def detect_platform(url):
-    host = urlparse(url).hostname or ""
-    host = host.lower().removeprefix("www.")
+    """Recognize common video platforms and direct video URLs."""
+    try:
+        parsed = urlparse(url.strip())
+        host = (parsed.hostname or "").lower().rstrip(".")
+        path = unquote(parsed.path).lower()
+    except (ValueError, AttributeError):
+        return None
 
-    if host.endswith("tiktok.com"):
-        return "TikTok"
-    if host.endswith("instagram.com"):
-        return "Instagram"
-    if host.endswith("facebook.com") or host.endswith("fb.watch"):
-        return "Facebook"
-    if host.endswith("t.me") or host.endswith("telegram.org"):
-        return "Telegram"
-    if host.endswith("movie-box.com.ng"):
-        return "MovieBox"
+    if parsed.scheme not in ("http", "https"):
+        return None
 
-    return "Direct"
+    if not is_allowed_public_host(host):
+        return None
+
+    for domain in SUPPORTED_HOSTS:
+        if host == domain or host.endswith("." + domain):
+            if domain in ("youtube.com", "youtu.be",
+                          "youtube-nocookie.com"):
+                return "YouTube"
+            if domain == "tiktok.com":
+                return "TikTok"
+            if domain == "instagram.com":
+                return "Instagram"
+            if domain in ("facebook.com", "fb.watch"):
+                return "Facebook"
+            if domain in ("twitter.com", "x.com"):
+                return "X / Twitter"
+            if domain == "vimeo.com":
+                return "Vimeo"
+            if domain == "dailymotion.com":
+                return "Dailymotion"
+            if domain == "reddit.com":
+                return "Reddit"
+            if domain == "twitch.tv":
+                return "Twitch"
+            if domain == "streamable.com":
+                return "Streamable"
+            if domain == "pinterest.com":
+                return "Pinterest"
+            if domain == "soundcloud.com":
+                return "SoundCloud"
+
+    if os.path.splitext(path)[1] in VIDEO_EXTENSIONS:
+        return "Direct video"
+
+    return None
 
 
-# ---------- Main pages ----------
+def valid_url(url):
+    if not isinstance(url, str) or not url.strip():
+        return False
+
+    if len(url) > 2048:
+        return False
+
+    parsed = urlparse(url.strip())
+
+    return (
+        parsed.scheme in ("http", "https")
+        and bool(parsed.hostname)
+        and not parsed.username
+        and not parsed.password
+    )
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-@app.route("/health")
+@app.route("/api/health")
 def health():
     return jsonify({
         "status": "ok",
-        "yt_dlp_version": yt_dlp.version.__version__
+        "service": "Black Video Downloader"
     })
 
-
-# ---------- Download endpoint ----------
 
 @app.route("/api/download", methods=["POST"])
 def download_video():
     data = request.get_json(silent=True) or {}
+    url = (data.get("url") or "").strip()
 
-    video_url = str(data.get("url", "")).strip()
-    selected_platform = str(data.get("platform", "Direct")).strip()
-
-    if not validate_url(video_url):
+    if not valid_url(url):
         return jsonify({
-            "error": "Please enter a valid public HTTP or HTTPS video link."
+            "success": False,
+            "error": "Please enter a valid video URL."
         }), 400
 
-    platform = detect_platform(video_url)
+    platform = detect_platform(url)
 
-    allowed_platforms = {
-        "TikTok", "Instagram", "Facebook",
-        "Telegram", "MovieBox", "Direct"
-    }
-
-    if selected_platform not in allowed_platforms:
-        return jsonify({"error": "Invalid platform selection."}), 400
-
-    # Accept supported platform URLs or links ending in a video extension.
-    suffix = Path(urlparse(video_url).path).suffix.lower()
-
-    if platform == "Direct" and suffix not in VIDEO_EXTENSIONS:
+    if not platform:
         return jsonify({
-            "error": "This link is not from a recognized platform or direct video file."
-        }), 400
-
-    temp_dir = tempfile.mkdtemp(prefix="black_downloader_")
-    output_template = os.path.join(temp_dir, "%(title).150B-%(id)s.%(ext)s")
-
-    options = {
-        "outtmpl": output_template,
-        "format": "best[ext=mp4]/best",
-        "noplaylist": True,
-        "max_filesize": MAX_FILE_SIZE,
-        "socket_timeout": 30,
-        "retries": 2,
-        "quiet": True,
-        "no_warnings": True,
-        "restrictfilenames": True,
-        "windowsfilenames": True,
-        "nocheckcertificate": False,
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/140.0.0.0 Safari/537.36"
+            "success": False,
+            "error": (
+                "This link is not from a recognized platform "
+                "or direct video file."
             )
-        }
-    }
+        }), 400
+
+    if not download_slots.acquire(blocking=False):
+        return jsonify({
+            "success": False,
+            "error": "The downloader is busy. Please try again shortly."
+        }), 429
+
+    workdir = tempfile.mkdtemp(prefix="download_", dir=DOWNLOADS_DIR)
 
     try:
-        with yt_dlp.YoutubeDL(options) as downloader:
-            info = downloader.extract_info(video_url, download=True)
-            prepared_path = downloader.prepare_filename(info)
+        options = {
+            "outtmpl": os.path.join(
+                workdir, "%(title).80s-%(id)s.%(ext)s"
+            ),
+            "format": "best[ext=mp4]/best",
+            "merge_output_format": "mp4",
+            "noplaylist": True,
+            "quiet": True,
+            "no_warnings": True,
+            "retries": 2,
+            "fragment_retries": 2,
+            "socket_timeout": 25,
+            "max_filesize": 500 * 1024 * 1024,
+            "restrictfilenames": True,
+        }
 
-        candidates = []
+        with YoutubeDL(options) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = info.get("title") or "video"
 
-        if os.path.isfile(prepared_path):
-            candidates.append(prepared_path)
+        files = [
+            os.path.join(workdir, name)
+            for name in os.listdir(workdir)
+            if os.path.isfile(os.path.join(workdir, name))
+            and not name.endswith((".part", ".ytdl", ".json"))
+        ]
 
-        # yt-dlp may change the extension after downloading or merging.
-        for path in Path(temp_dir).iterdir():
-            if path.is_file() and path.suffix.lower() in VIDEO_EXTENSIONS:
-                if str(path) not in candidates:
-                    candidates.append(str(path))
-
-        if not candidates:
-            raise RuntimeError(
-                "No downloadable video file was produced for this link."
+        if not files:
+            raise DownloadError(
+                "The download finished without producing a video file."
             )
 
-        file_path = max(candidates, key=os.path.getsize)
-        file_size = os.path.getsize(file_path)
+        # Prefer the largest completed file.
+        filepath = max(files, key=os.path.getsize)
+        extension = os.path.splitext(filepath)[1].lower()
 
-        if file_size == 0:
-            raise RuntimeError("The downloaded file is empty.")
+        if extension not in VIDEO_EXTENSIONS:
+            raise DownloadError(
+                "The downloaded file is not a supported video format."
+            )
 
-        if file_size > MAX_FILE_SIZE:
-            raise RuntimeError("The video exceeds the 500 MB limit.")
-
-        filename = secure_filename(os.path.basename(file_path))
-        if not filename:
-            filename = "black-downloader-video" + Path(file_path).suffix
+        safe_title = re.sub(r'[\\/:*?"<>|]+', "_", title).strip()
+        safe_title = safe_title[:100] or "video"
+        filename = f"{safe_title}{extension}"
 
         response = send_file(
-            file_path,
+            filepath,
             as_attachment=True,
             download_name=filename,
-            conditional=False
+            mimetype="application/octet-stream",
+            conditional=False,
         )
 
+        # Clean up temporary files after the response is closed.
         response.call_on_close(
-            lambda: shutil.rmtree(temp_dir, ignore_errors=True)
+            lambda: shutil.rmtree(workdir, ignore_errors=True)
         )
+        response.call_on_close(download_slots.release)
 
         return response
 
-    except Exception as error:
-        app.logger.exception("Video download failed")
-        shutil.rmtree(temp_dir, ignore_errors=True)
+    except DownloadError as exc:
+        shutil.rmtree(workdir, ignore_errors=True)
+        download_slots.release()
 
-        message = str(error)
+        message = str(exc)
+        print("yt-dlp download error:", message)
 
         if "Unsupported URL" in message:
-            message = "This link is not supported."
-        elif "private" in message.lower():
-            message = "This video is private or unavailable."
-        elif "max_filesize" in message.lower() or "file is larger" in message.lower():
-            message = "The video exceeds the 500 MB limit."
+            message = (
+                "This URL is not supported by the current yt-dlp version."
+            )
+        elif "Sign in" in message or "login" in message.lower():
+            message = (
+                "This video requires authentication. "
+                "Try a publicly accessible video you have permission to download."
+            )
+        elif "Private video" in message:
+            message = "This video is private and cannot be downloaded publicly."
         else:
             message = (
-                "Download failed. The link may be unsupported, "
-                "private, or temporarily blocked by the platform."
+                "The download failed. The platform may have changed "
+                "its requirements, or the video may be unavailable. "
+                "Try again later."
             )
 
-        return jsonify({"error": message}), 502
+        return jsonify({
+            "success": False,
+            "error": message
+        }), 422
+
+    except Exception as exc:
+        shutil.rmtree(workdir, ignore_errors=True)
+        download_slots.release()
+
+        print("Unexpected download error:", repr(exc))
+
+        return jsonify({
+            "success": False,
+            "error": "Something went wrong. Please try again later."
+        }), 500
+
+
+@app.errorhandler(413)
+def file_too_large(error):
+    return jsonify({
+        "success": False,
+        "error": "The submitted request is too large."
+    }), 413
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "10000"))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
