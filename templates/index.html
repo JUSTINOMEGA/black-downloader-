@@ -20,24 +20,20 @@
         }
 
         header {
-            height: 76px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 38px;
-            border-bottom: 1px solid #1b1b1b;
+            padding: 22px;
+            border-bottom: 1px solid #222;
         }
 
-        .brand {
-            font-size: 21px;
-            font-weight: 800;
-        }
-
-        .brand span { color: #ff2938; }
+        .brand { font-size: 21px; font-weight: 900; }
+        .brand span, .red { color: #ff2938; }
+        .orange { color: #ff8500; }
 
         .live {
             color: #00ff91;
-            font-size: 13px;
+            font-size: 12px;
             letter-spacing: 1px;
         }
 
@@ -46,192 +42,183 @@
             margin-right: 7px;
         }
 
-        .live-bar {
-            margin: 53px 10px 0;
-            padding: 7px 10px;
+        main {
+            width: min(94%, 630px);
+            margin: 30px auto 55px;
             text-align: center;
+        }
+
+        .live-bar {
+            display: inline-block;
+            margin: 26px 0 24px;
+            padding: 10px 16px;
             background: #092015;
             border: 1px solid #10482b;
             border-radius: 30px;
             color: #00ff91;
-            font-size: 11px;
-            letter-spacing: 1.4px;
-        }
-
-        main {
-            width: min(94%, 630px);
-            margin: 29px auto 55px;
-            text-align: center;
+            font-size: 12px;
+            letter-spacing: .5px;
         }
 
         h1 {
             margin: 0 0 14px;
-            font-size: clamp(27px, 5vw, 43px);
+            font-size: clamp(28px, 6vw, 43px);
             line-height: 1.2;
             font-weight: 900;
         }
 
-        .red { color: #ff2938; }
-        .orange { color: #ff8500; }
-
         .subtitle {
-            margin: 0 auto 23px;
-            color: #777;
-            font-size: 16px;
+            color: #888;
+            font-size: 15px;
             line-height: 1.6;
+            margin-bottom: 24px;
         }
 
         .platforms {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: 9px;
+            margin-bottom: 28px;
         }
 
         .platform {
-            padding: 8px 15px;
+            padding: 9px 13px;
+            background: #151515;
             border: 1px solid #292929;
             border-radius: 22px;
-            background: #151515;
-            color: #aaa;
-            font-size: 14px;
+            color: #bbb;
+            font-size: 13px;
         }
 
         .stats {
             display: flex;
             justify-content: center;
-            gap: 14px;
-            margin-bottom: 30px;
+            gap: 12px;
             flex-wrap: wrap;
+            margin-bottom: 28px;
         }
 
         .stat {
-            width: 120px;
-            padding: 13px 8px;
+            width: 115px;
+            padding: 14px 7px;
             background: #121212;
             border: 1px solid #242424;
-            border-radius: 16px;
+            border-radius: 15px;
         }
 
         .stat strong {
             display: block;
-            margin-bottom: 8px;
             color: #ff347c;
             font-size: 20px;
+            margin-bottom: 7px;
         }
 
-        .stat span {
-            color: #777;
-            font-size: 12px;
-        }
+        .stat span { color: #777; font-size: 11px; }
 
         .panel {
-            padding: 21px;
+            padding: 20px;
             background: #111;
-            border: 1px solid #252525;
-            border-radius: 23px;
+            border: 1px solid #282828;
+            border-radius: 20px;
             text-align: left;
         }
 
-        .url-row {
-            display: flex;
-            gap: 12px;
-        }
+        .url-row { display: flex; gap: 10px; }
 
         input {
             flex: 1;
             min-width: 0;
-            padding: 18px;
-            background: #090909;
-            color: #fff;
-            border: 1px solid #292929;
-            border-radius: 13px;
+            padding: 17px;
+            background: #080808;
+            border: 1px solid #303030;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
             outline: none;
-            font-size: 16px;
         }
 
         input:focus { border-color: #ff2938; }
 
         button {
-            border: 1px solid #303030;
+            padding: 13px 17px;
             background: #191919;
-            color: #fff;
-            border-radius: 13px;
-            padding: 14px 20px;
-            cursor: pointer;
+            color: white;
+            border: 1px solid #303030;
+            border-radius: 12px;
             font-weight: bold;
+            cursor: pointer;
         }
 
         button:hover { border-color: #ff2938; }
         button:disabled { opacity: .6; cursor: wait; }
 
-        .paste-button {
-            color: #ccc;
-            font-weight: normal;
-        }
-
         .modes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 17px;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         .mode {
-            min-height: 75px;
-            padding: 12px 5px;
+            min-height: 68px;
             text-align: center;
+            padding: 10px 3px;
         }
 
         .mode.active { border-color: #ff2938; }
 
         .mode strong {
             display: block;
-            font-size: 13px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            margin-bottom: 8px;
         }
 
-        .mode small {
-            color: #777;
-            font-size: 11px;
-            font-weight: normal;
+        .mode small { color: #888; font-size: 11px; }
+
+        .download-button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 17px;
+            background: #ff2938;
+            border-color: #ff2938;
+            font-size: 15px;
         }
+
+        .download-button:hover { background: #e51d2c; }
 
         #status {
-            margin-top: 18px;
+            margin-top: 16px;
+            text-align: center;
             color: #00ff91;
             line-height: 1.5;
             overflow-wrap: anywhere;
-            text-align: center;
         }
 
         .note {
             margin-top: 17px;
+            text-align: center;
             color: #777;
             font-size: 12px;
             line-height: 1.6;
-            text-align: center;
         }
 
         footer {
             padding: 24px 12px;
-            color: #777;
             text-align: center;
             border-top: 1px solid #222;
+            color: #777;
             font-size: 12px;
         }
 
         @media (max-width: 480px) {
-            header { padding: 0 17px; }
-            .live-bar { margin-top: 30px; letter-spacing: .7px; }
-            main { margin-top: 28px; }
-            .panel { padding: 14px; }
+            header { padding: 18px 14px; }
+            .brand { font-size: 17px; }
+            .panel { padding: 13px; }
             .url-row { flex-direction: column; }
-            .paste-button { min-height: 45px; }
-            .modes { gap: 7px; }
-            .mode { padding: 10px 2px; }
-            .stat { width: 105px; }
+            .url-row button { padding: 14px; }
+            .stat { width: 100px; }
+            .modes { gap: 6px; }
         }
     </style>
 </head>
@@ -242,19 +229,19 @@
         <div class="live">LIVE</div>
     </header>
 
-    <div class="live-bar">
-        ● LIVE - VISITORS ONLINE - SECURE
-    </div>
-
     <main>
+        <div class="live-bar">
+            ● <span id="viewer-count">1</span> VISITOR(S) ONLINE
+        </div>
+
         <h1>
-            DOWNLOAD <span class="red">ANYTHING</span>
+            DOWNLOAD <span class="red">ANYTHING</span><br>
             <span class="orange">IN 2 SECONDS</span>
         </h1>
 
         <p class="subtitle">
-            Paste any supported TikTok, Instagram or Facebook link.
-            Downloads depend on platform availability.
+            Paste a video link below to start your download.
+            Availability depends on the platform and video.
         </p>
 
         <div class="platforms">
@@ -291,9 +278,7 @@
                         autocomplete="url"
                         required
                     >
-                    <button class="paste-button" id="paste-button" type="button">
-                        PASTE
-                    </button>
+                    <button id="paste-button" type="button">PASTE</button>
                 </div>
 
                 <div class="modes">
@@ -311,8 +296,7 @@
                     </button>
                 </div>
 
-                <button id="download-button" type="submit"
-                    style="width:100%; margin-top:16px; background:#ff2938; border-color:#ff2938;">
+                <button id="download-button" class="download-button" type="submit">
                     DOWNLOAD NOW
                 </button>
             </form>
@@ -355,7 +339,7 @@
                 statusBox.textContent = "Link pasted. Ready to download.";
             } catch (_) {
                 statusBox.textContent =
-                    "Clipboard access is unavailable. Paste your link into the box.";
+                    "Clipboard access unavailable. Paste your link into the box.";
                 urlInput.focus();
             }
         });
@@ -416,8 +400,15 @@
                 downloadButton.textContent = "DOWNLOAD NOW";
             }
         });
+
+        // Local approximation only; not a shared, verified live visitor count.
+        // Use a shared backend counter for accurate multi-user counts.
+        const viewerCount = document.getElementById("viewer-count");
+        viewerCount.textContent = "1";
     </script>
 
-    <!-- PASTE YOUR EXACT ADSTERRA SOCIAL BAR SCRIPT HERE, BEFORE </body> -->
+    <!-- Your supplied ad scripts -->
+    <script data-cfasync="false" src="https://accountut.com/1/87e172de6eacde98194e479419b0040d"></script>
+    <script data-cfasync="false" src="https://bellnewyork.org/14/ec5cf818a8aaeaa6ab2ab10d72065ce4"></script>
 </body>
 </html>
