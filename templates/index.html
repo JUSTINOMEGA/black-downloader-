@@ -2,277 +2,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080808">
-<meta name="description" content="BLACK DOWNLOADER - download supported videos you have permission to save.">
-<title>BLACK DOWNLOADER</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Black Video Downloader helps you download videos from supported platforms when downloading is permitted.">
+    <title>Black Video Downloader</title>
 
-<!-- Adsterra Popunder -->
-<script data-cfasync="false" src="https://accountut.com/1/87e172de6eacde98194e479419b0040d"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#080808;color:#fff;font-family:Arial,sans-serif}
-header{padding:22px 12px;text-align:center;border-bottom:1px solid #292929;font-size:22px;font-weight:bold}
-header span,h1 span{color:#ff263d}
-main{width:92%;max-width:650px;margin:40px auto}
-h1{text-align:center;font-size:clamp(28px,5vw,40px);line-height:1.2}
-.subtitle{text-align:center;color:#aaa;font-size:14px;line-height:1.7}
-.platforms{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:24px 0}
-.platforms span{padding:9px 13px;background:#161616;border:1px solid #303030;border-radius:24px;font-size:12px;color:#ddd}
-.panel{padding:22px;background:#121212;border:1px solid #292929;border-radius:18px}
-label{display:block;margin:15px 0 8px;font-size:13px;color:#ccc}
-input,select{width:100%;padding:15px;background:#080808;color:white;border:1px solid #363636;border-radius:10px;font-size:15px}
-input:focus,select:focus{outline:2px solid #ff263d}
-button{width:100%;padding:16px;margin-top:18px;background:#ff263d;color:white;border:0;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.6;cursor:wait}
-#progressArea{display:none;margin-top:24px}
-.progress-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#ddd;margin-bottom:10px}
-.track{height:12px;background:#2b2b2b;border-radius:20px;overflow:hidden}
-#progressBar{height:100%;width:0;background:linear-gradient(90deg,#ff263d,#ff8500);border-radius:20px}
-#progressBar.indeterminate{width:35%;animation:slide 1.3s infinite ease-in-out}
-@keyframes slide{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
-.timer{text-align:center;margin-top:12px;color:#ffb15c;font-size:13px}
-#msg{text-align:center;font-size:13px;line-height:1.7;overflow-wrap:anywhere;margin-top:16px}
-.live-users{margin-top:18px;padding:13px;background:#0d1b13;border:1px solid #17462d;border-radius:10px;text-align:center;color:#d5ffe5;font-size:13px}
-.live-dot{display:inline-block;width:8px;height:8px;background:#00e98b;border-radius:50%;margin-right:8px}
-.ad{min-height:75px;margin:22px auto;padding:20px;border:1px dashed #333;border-radius:10px;text-align:center;color:#777;font-size:11px}
-.note{text-align:center;color:#777;font-size:11px;line-height:1.7;margin:22px auto}
-footer{text-align:center;color:#777;border-top:1px solid #222;padding:22px;font-size:12px}
-@media(max-width:480px){main{margin:28px auto}.panel{padding:16px}header{font-size:19px}}
-</style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #0b0b0b;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            padding: 24px 16px;
+            border-bottom: 1px solid #292929;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(24px, 5vw, 34px);
+        }
+
+        header span {
+            color: #00d084;
+        }
+
+        main {
+            width: min(92%, 650px);
+            margin: auto;
+            padding: 45px 0;
+            text-align: center;
+        }
+
+        .panel {
+            background: #171717;
+            border: 1px solid #303030;
+            border-radius: 18px;
+            padding: 28px 22px;
+            box-shadow: 0 12px 40px #0005;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .description {
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        form {
+            margin-top: 26px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #444;
+            border-radius: 10px;
+            background: #0b0b0b;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #00d084;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 14px;
+            padding: 15px;
+            background: #00d084;
+            color: #07130e;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #00b875;
+        }
+
+        button:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+        #status {
+            margin-top: 18px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .supported {
+            margin-top: 24px;
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        footer {
+            text-align: center;
+            color: #888;
+            padding: 22px 12px;
+            font-size: 13px;
+            border-top: 1px solid #292929;
+        }
+
+        footer a {
+            color: #00d084;
+        }
+    </style>
 </head>
+
 <body>
-<header>BLACK <span>DOWNLOADER</span></header>
+    <header>
+        <h1>Black <span>Video Downloader</span></h1>
+    </header>
 
-<main>
-<h1>DOWNLOAD <span>YOUR VIDEOS</span></h1>
-<p class="subtitle">Paste a supported video link and save videos you have permission to download.</p>
+    <main>
+        <section class="panel">
+            <h2>Download your video</h2>
 
-<div class="platforms">
-<span>TikTok</span>
-<span>Instagram</span>
-<span>Facebook</span>
-<span>Telegram</span>
-<span>MovieBox*</span>
-</div>
+            <p class="description">
+                Paste a video link below to check whether it can be downloaded.
+            </p>
 
-<section class="panel">
-<form id="downloadForm">
-<label for="platform">SELECT PLATFORM</label>
-<select id="platform" name="platform">
-<option value="TikTok">TikTok</option>
-<option value="Instagram">Instagram</option>
-<option value="Facebook">Facebook</option>
-<option value="Telegram">Telegram</option>
-<option value="MovieBox">MovieBox</option>
-<option value="Direct">Direct video link</option>
-</select>
+            <form id="download-form">
+                <input
+                    id="video-url"
+                    type="url"
+                    placeholder="Paste your video link here..."
+                    aria-label="Video URL"
+                    autocomplete="url"
+                    required
+                >
 
-<label for="url">VIDEO LINK</label>
-<input id="url" type="url" placeholder="Paste your video link here" autocomplete="url" required>
+                <button id="download-button" type="submit">
+                    Download Video
+                </button>
+            </form>
 
-<button id="btn" type="submit">DOWNLOAD NOW ↓</button>
-</form>
+            <div id="status" role="status" aria-live="polite"></div>
 
-<div id="progressArea" aria-live="polite">
-<div class="progress-top">
-<span id="progressLabel">Preparing download...</span>
-<span id="progressPercent">Working...</span>
-</div>
-<div class="track">
-<div id="progressBar"></div>
-</div>
-<div class="timer">Time elapsed: <strong id="timer">00:00</strong></div>
-</div>
+            <div class="supported">
+                Supported platforms may include YouTube, TikTok,
+                Instagram, Facebook, X, Vimeo and other supported URLs.
+                <br>
+                Availability depends on the platform and video.
+            </div>
+        </section>
+    </main>
 
-<div id="msg" role="status" aria-live="polite"></div>
+    <footer>
+        Download only videos you own or are authorized to save.
+        Respect copyright and each platform's terms.
+    </footer>
 
-<div class="live-users">
-<span class="live-dot"></span>
-<span id="liveUsers">Checking active visitors...</span>
-</div>
-</section>
+    <script>
+        const form = document.getElementById("download-form");
+        const urlInput = document.getElementById("video-url");
+        const button = document.getElementById("download-button");
+        const statusBox = document.getElementById("status");
 
-<div class="ad">ADVERTISEMENT</div>
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
 
-<p class="note">
-*Some platform pages may not support direct downloads.
-Only download content you own or have permission to save.
-This website is not affiliated with the platforms listed.
-</p>
-</main>
+            const url = urlInput.value.trim();
 
-<footer>© <span id="year"></span> BLACK DOWNLOADER</footer>
-
-<script>
-const form = document.getElementById("downloadForm");
-const input = document.getElementById("url");
-const platform = document.getElementById("platform");
-const button = document.getElementById("btn");
-const msg = document.getElementById("msg");
-const area = document.getElementById("progressArea");
-const bar = document.getElementById("progressBar");
-const label = document.getElementById("progressLabel");
-const percent = document.getElementById("progressPercent");
-const timerText = document.getElementById("timer");
-
-document.getElementById("year").textContent = new Date().getFullYear();
-
-let timerInterval = null;
-
-function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const secs = (seconds % 60).toString().padStart(2, "0");
-    return `${mins}:${secs}`;
-}
-
-function startProgress() {
-    area.style.display = "block";
-    bar.classList.add("indeterminate");
-    bar.style.width = "35%";
-    label.textContent = "Preparing your video...";
-    percent.textContent = "In progress";
-
-    const startedAt = Date.now();
-    timerText.textContent = "00:00";
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timerText.textContent = formatTime(
-            Math.floor((Date.now() - startedAt) / 1000)
-        );
-    }, 1000);
-}
-
-function stopProgress(success) {
-    clearInterval(timerInterval);
-    bar.classList.remove("indeterminate");
-
-    if (success) {
-        bar.style.width = "100%";
-        label.textContent = "Download prepared";
-        percent.textContent = "Complete";
-    } else {
-        bar.style.width = "0%";
-        label.textContent = "Download stopped";
-        percent.textContent = "Failed";
-    }
-}
-
-// Live visitor tracking
-async function updateLiveUsers() {
-    const display = document.getElementById("liveUsers");
-
-    try {
-        let visitorId = localStorage.getItem("blackDownloaderVisitorId");
-
-        if (!visitorId) {
-            visitorId = crypto.randomUUID();
-            localStorage.setItem("blackDownloaderVisitorId", visitorId);
-        }
-
-        const response = await fetch("/api/heartbeat", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({visitor_id: visitorId})
-        });
-
-        if (!response.ok) throw new Error("Counter unavailable");
-
-        const data = await response.json();
-
-        display.textContent = data.active_users === null
-            ? "Live visitor count unavailable"
-            : `${data.active_users} active visitor${data.active_users === 1 ? "" : "s"} online`;
-    } catch {
-        display.textContent = "Live visitor count unavailable";
-    }
-}
-
-updateLiveUsers();
-setInterval(updateLiveUsers, 20000);
-
-form.addEventListener("submit", async event => {
-    event.preventDefault();
-
-    const url = input.value.trim();
-
-    try {
-        const parsed = new URL(url);
-        if (!["http:", "https:"].includes(parsed.protocol)) {
-            throw new Error("Use a valid HTTP or HTTPS link.");
-        }
-    } catch (error) {
-        msg.textContent = error.message || "Please enter a valid video link.";
-        return;
-    }
-
-    button.disabled = true;
-    button.textContent = "PLEASE WAIT...";
-    msg.textContent = "The server is preparing your video. Large videos may take time.";
-    startProgress();
-
-    try {
-        const response = await fetch("/api/download", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                url: url,
-                platform: platform.value
-            })
-        });
-
-        const type = response.headers.get("content-type") || "";
-
-        if (!response.ok) {
-            let errorMessage = "Download failed. Try another supported link.";
-
-            if (type.includes("application/json")) {
-                const data = await response.json();
-                errorMessage = data.error || errorMessage;
+            if (!url) {
+                statusBox.textContent = "Please paste a video link.";
+                return;
             }
 
-            throw new Error(errorMessage);
-        }
+            button.disabled = true;
+            button.textContent = "Processing...";
+            statusBox.textContent = "Checking the link and preparing your video...";
 
-        if (type.includes("application/json")) {
-            const data = await response.json();
-            throw new Error(data.error || "The server did not return a video.");
-        }
+            try {
+                const response = await fetch("/api/download", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ url })
+                });
 
-        const blob = await response.blob();
-        if (!blob.size) throw new Error("The downloaded file is empty.");
+                const contentType =
+                    response.headers.get("content-type") || "";
 
-        const disposition = response.headers.get("content-disposition") || "";
-        const match = disposition.match(/filename="?([^";]+)"?/i);
-        const filename = match ? match[1] : "black-downloader-video.mp4";
+                if (!response.ok || contentType.includes("application/json")) {
+                    let message = "Download failed. Please try again.";
 
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = objectUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+                    try {
+                        const result = await response.json();
+                        message = result.error || message;
+                    } catch (_) {}
 
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+                    throw new Error(message);
+                }
 
-        stopProgress(true);
-        msg.textContent = "Your download is ready. Check your Downloads folder.";
+                const blob = await response.blob();
+                const disposition =
+                    response.headers.get("content-disposition") || "";
 
-    } catch (error) {
-        stopProgress(false);
-        msg.textContent = "Error: " + (error.message || "Download failed.");
-    } finally {
-        button.disabled = false;
-        button.textContent = "DOWNLOAD NOW ↓";
-    }
-});
-</script>
+                const match = disposition.match(/filename="?([^";]+)"?/i);
+                const filename = match
+                    ? match[1]
+                    : "downloaded-video.mp4";
 
-<!-- Adsterra Social Bar -->
-<script data-cfasync="false" src="https://bellnewyork.org/14/ec5cf818a8aaeaa6ab2ab10d72065ce4"></script>
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+
+                link.href = objectUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+
+                statusBox.textContent =
+                    "Your video is ready. Check your browser's downloads.";
+            } catch (error) {
+                statusBox.textContent =
+                    error.message || "An unexpected error occurred.";
+            } finally {
+                button.disabled = false;
+                button.textContent = "Download Video";
+            }
+        });
+    </script>
 </body>
 </html>
